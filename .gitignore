@@ -1,0 +1,4 @@
+*.code-workspace
+.vscode
+paper_manager-client/build
+paper_manager-client/debug
