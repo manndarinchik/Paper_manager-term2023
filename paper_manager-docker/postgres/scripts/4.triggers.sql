@@ -1,3 +1,21 @@
+
+CREATE OR REPLACE FUNCTION generate_abbreviation(str TEXT) 
+   RETURNS TEXT 
+AS $$
+DECLARE tokens TEXT[];
+DECLARE token TEXT;
+DECLARE res TEXT;
+BEGIN
+	res := '';
+    tokens := string_to_array(str, ' ');
+    FOREACH token IN ARRAY tokens
+    LOOP
+        res := res || upper(left(token, 1));
+    END LOOP;
+	RETURN res;
+END;
+$$ LANGUAGE PLPGSQL;
+
 CREATE OR REPLACE FUNCTION generate_publisher_abbreviation() 
    RETURNS TRIGGER 
 AS $$

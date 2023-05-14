@@ -26,6 +26,16 @@ CREATE VIEW PUBLICATION_COMPOSITE AS
 	) AS tmp
 	JOIN PUBLISHER pr ON pr.publisherID = tmp.publisherID;
 
+CREATE OR REPLACE FUNCTION get_publication_amount(_id INT, _type INT)
+RETURNS INT
+AS $$
+BEGIN
+	RETURN CAST((SELECT
+		COUNT(*)
+	FROM PUBLICATION_AUTHORS pa
+	JOIN PUBLICATION p ON p.publicationID = pa.publicationID AND p.type = _type 
+	WHERE pa.authorID = _id) AS INT);
+END $$ LANGUAGE plpgsql;
 CREATE VIEW AUTHOR_COMPOSITE AS
 SELECT 
     a.authorID,
@@ -45,10 +55,10 @@ SELECT
 	c.name,
 	p.fullName,
 	c.publicationdate,
-	tmp.publicationCount
+	COALESCE(tmp.publicationCount, 0) publicationCount
 FROM COMPILATION c
 JOIN PUBLISHER p ON c.publisherID = p.publisherID
-JOIN (SELECT compilationID, COUNT(*) publicationCount
+LEFT JOIN (SELECT compilationID, COUNT(*) publicationCount
 	  FROM COMPILATION_ENTRY GROUP BY compilationID)
 	  AS tmp ON tmp.compilationID = c.compilationID;
 

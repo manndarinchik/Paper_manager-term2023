@@ -1,0 +1,10 @@
+CREATE INDEX author_index ON AUTHOR(authorID);		
+CREATE INDEX publisher_index ON PUBLISHER(publisherID);
+CREATE INDEX publication_index ON PUBLICATION(publicationID);
+CREATE INDEX compilation_index ON COMPILATION(compilationID);
+
+CREATE INDEX pa_index ON PUBLICATION_AUTHORS(publicationID);
+CREATE INDEX ce_index ON COMPILATION_ENTRY(compilationID);
+
+CLUSTER PUBLICATION_AUTHORS USING pa_index;
+CLUSTER COMPILATION_ENTRY USING ce_index;
