@@ -5,9 +5,20 @@
 TEMPLATE = app
 INCLUDEPATH += .
 
-QT += core gui widgets
+QT += core gui widgets sql
+
 
 SOURCES += \
     main.cpp \
+    psqlinterface.cpp \
+    mainwindow.cpp \
+    loginwindow.cpp \
+
+HEADERS += \
+    psqlinterface.h \
+    mainwindow.h \
+    loginwindow.h \
 
 # Directories
+
+set(CMAKE_AUTOMOC ON)
