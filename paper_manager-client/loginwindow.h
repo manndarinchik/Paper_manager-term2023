@@ -7,10 +7,6 @@
 #include <QLabel>
 #include "psqlinterface.h"
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
-
 class LoginWindow : public QMainWindow
 {
     Q_OBJECT
@@ -21,15 +17,20 @@ public:
 
 signals:
     void login_successful();
+    void error_called(QString message);
+
+public slots:
+    void disable(){this->setEnabled(false);}
+    void enable(){this->setEnabled(true);}
 
 private slots:
     void on_login_clicked();
+    
 
 private:
     PSQLInterface *db;
     QLineEdit *login_input;
     QLineEdit *pswd_input;
     QPushButton *login_btn;
-    QLabel *login_error ;
 };
 #endif // MAINWINDOW_H

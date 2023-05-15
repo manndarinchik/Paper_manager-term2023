@@ -8,7 +8,7 @@ LoginWindow::LoginWindow(PSQLInterface *psqli, QWidget *parent)
     : QMainWindow(parent)
 {
     db = psqli;
-    this->resize(350, 200);
+    this->resize(300, 200);
     this->setWindowTitle(QString("Вход"));
     QWidget *centralWidget = new QWidget;
     this->setCentralWidget(centralWidget);
@@ -36,17 +36,12 @@ LoginWindow::LoginWindow(PSQLInterface *psqli, QWidget *parent)
     QObject::connect(login_btn, &QPushButton::clicked,
                      this, &LoginWindow::on_login_clicked);
 
-    login_error = new QLabel("");
-    login_error->setStyleSheet("color:red;");
-
     btn_lo->addWidget(login_btn);
-    btn_lo->addWidget(login_error);
 
     centralLayout->setContentsMargins(25, 50, 25, 50);
     centralLayout->addLayout(login_lo);  
     centralLayout->addLayout(pswd_lo);  
     centralLayout->addLayout(btn_lo);
-    centralLayout->addWidget(login_error);
 
     this->setFixedSize(sizeHint());
 }
@@ -57,7 +52,6 @@ LoginWindow::~LoginWindow()
     delete login_input;
     delete pswd_input;
     delete db;
-    delete login_error;
 }
 
 void LoginWindow::on_login_clicked(){
@@ -71,7 +65,7 @@ void LoginWindow::on_login_clicked(){
         close();
         login_successful();
     } else {
-        login_error->setText(QString("Ошибка входа"));
+        emit error_called(QString("Ошибка авторизации"));
     }
 }
 
