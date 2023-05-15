@@ -51,7 +51,6 @@ LoginWindow::~LoginWindow()
     delete login_btn;
     delete login_input;
     delete pswd_input;
-    delete db;
 }
 
 void LoginWindow::on_login_clicked(){

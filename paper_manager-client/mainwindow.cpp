@@ -59,7 +59,5 @@ void MainWindow::init(){
 }
 
 MainWindow::~MainWindow()
-{
-    delete db;
-}
+{}
 
