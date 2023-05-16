@@ -5,14 +5,9 @@
 #include <QPushButton>
 
 LoginWindow::LoginWindow(PSQLInterface *psqli, QWidget *parent)
-    : QMainWindow(parent)
+    : BaseWindow(psqli, "Вход", parent)
 {
-    db = psqli;
     this->resize(300, 200);
-    this->setWindowTitle(QString("Вход"));
-    QWidget *centralWidget = new QWidget;
-    this->setCentralWidget(centralWidget);
-    QVBoxLayout *centralLayout = new QVBoxLayout(centralWidget);
 
     QHBoxLayout *login_lo = new QHBoxLayout();
     QLabel *login_label = new QLabel("Логин:");
@@ -38,19 +33,12 @@ LoginWindow::LoginWindow(PSQLInterface *psqli, QWidget *parent)
 
     btn_lo->addWidget(login_btn);
 
-    centralLayout->setContentsMargins(25, 50, 25, 50);
-    centralLayout->addLayout(login_lo);  
-    centralLayout->addLayout(pswd_lo);  
-    centralLayout->addLayout(btn_lo);
+    centralL->setContentsMargins(25, 50, 25, 50);
+    centralL->addLayout(login_lo);  
+    centralL->addLayout(pswd_lo);  
+    centralL->addLayout(btn_lo);
 
     this->setFixedSize(sizeHint());
-}
-
-LoginWindow::~LoginWindow()
-{
-    delete login_btn;
-    delete login_input;
-    delete pswd_input;
 }
 
 void LoginWindow::on_login_clicked(){
@@ -58,9 +46,9 @@ void LoginWindow::on_login_clicked(){
     QString pswd = pswd_input->text();
 
     db->connect_to_bd(login, pswd);
-    qDebug() << login << pswd << db->open();
+    qDebug() << login << pswd << db->isOpen();
 
-    if (db->open()){
+    if (db->isOpen()){
         close();
         login_successful();
     } else {

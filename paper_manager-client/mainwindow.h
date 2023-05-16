@@ -2,22 +2,20 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "basewindow.h"
 #include "psqlinterface.h"
 
-class MainWindow : public QMainWindow
+class MainWindow : public BaseWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(PSQLInterface* psqli, QWidget *parent = nullptr);
-    ~MainWindow();
+    MainWindow(PSQLInterface* psqli);
 public slots:
     void init();
 
 signals:
 
-
 private:
-    PSQLInterface* db;
 };
 #endif // MAINWINDOW_H

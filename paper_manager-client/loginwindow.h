@@ -3,32 +3,26 @@
 
 #include <QLineEdit>
 #include <QPushButton>
-#include <QMainWindow>
 #include <QLabel>
 #include "psqlinterface.h"
+#include "basewindow.h"
 
-class LoginWindow : public QMainWindow
+class LoginWindow : public BaseWindow
 {
     Q_OBJECT
 
 public:
-    LoginWindow(PSQLInterface *psqli, QWidget *parent = nullptr);
-    ~LoginWindow();
+    LoginWindow(PSQLInterface *psqli, QWidget *parent);
 
 signals:
     void login_successful();
     void error_called(QString message);
-
-public slots:
-    void disable(){this->setEnabled(false);}
-    void enable(){this->setEnabled(true);}
 
 private slots:
     void on_login_clicked();
     
 
 private:
-    PSQLInterface *db;
     QLineEdit *login_input;
     QLineEdit *pswd_input;
     QPushButton *login_btn;

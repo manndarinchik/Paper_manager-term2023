@@ -3,18 +3,11 @@
 #include <QVBoxLayout>
 #include <QTableWidget>
 
-MainWindow::MainWindow(PSQLInterface *psqli, QWidget *parent)
-    : QMainWindow(parent){
-        db = psqli;
-}
+MainWindow::MainWindow(PSQLInterface *psqli) 
+    : BaseWindow(psqli, "Публикации"){}
 
 void MainWindow::init(){
     this->resize(800, 500);
-    this->setWindowTitle(QString("Публикации"));
-
-    QWidget *centralWidget = new QWidget;
-    this->setCentralWidget(centralWidget);
-    QVBoxLayout *centralLayout = new QVBoxLayout(centralWidget);
 
     QTabWidget *tabsWidget = new QTabWidget();
     QWidget *pn_tab = new QWidget;
@@ -53,11 +46,8 @@ void MainWindow::init(){
     cn_lo->addWidget(cn_table);
     cn_table->setHorizontalHeaderLabels(cn_labels);
 
-    centralLayout->addWidget(tabsWidget);  
+    centralL->addWidget(tabsWidget);  
 
     show();
 }
-
-MainWindow::~MainWindow()
-{}
 

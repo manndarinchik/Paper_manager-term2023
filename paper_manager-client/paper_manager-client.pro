@@ -14,12 +14,14 @@ SOURCES += \
     mainwindow.cpp \
     loginwindow.cpp \
     errorwindow.cpp \
+    basewindow.cpp \
 
 HEADERS += \
     psqlinterface.h \
     mainwindow.h \
     loginwindow.h \
     errorwindow.h \
+    basewindow.h \
 
 # Directories
 

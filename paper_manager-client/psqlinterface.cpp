@@ -27,4 +27,4 @@ bool PSQLInterface::issue_query(QString query){
     model->setQuery(query);
 }
 
-bool PSQLInterface::open() {return db.open();}
+bool PSQLInterface::isOpen() {return db.isOpen();}

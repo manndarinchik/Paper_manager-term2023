@@ -12,7 +12,7 @@ class PSQLInterface : public QObject
     PSQLInterface();
     ~PSQLInterface();
     static bool issue_query(QString query);
-    bool open();
+    bool isOpen();
 
     public slots:
     void connect_to_bd(QString login, QString pswd);
