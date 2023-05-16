@@ -61,11 +61,11 @@ void MainWindow::update_tab_table(int index){
         if (model != nullptr) ar_table->setModel(model);
         break;
     case 2:
-        model = query_database("SELECT * FROM PUBLISH_ER");
+        model = query_database("SELECT * FROM PUBLISHER");
         if (model != nullptr) pr_table->setModel(model);
         break;
     case 3:
-        model = query_database("bruh");
+        model = query_database("SELECT * FROM COMPILATION_COMPOSITE");
         if (model != nullptr) cn_table->setModel(model);
         break;
     }
