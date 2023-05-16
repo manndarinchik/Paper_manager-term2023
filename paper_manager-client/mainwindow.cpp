@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "psqlinterface.h"
+#include "tabitemwindow.h"
 #include <QVBoxLayout>
 #include <QTableView>
 
@@ -32,7 +33,26 @@ void MainWindow::init(){
 
     centralL->addWidget(tabsWidget);  
 
+    addBtn = new QPushButton();
+    addBtn->setText("+");
+    QHBoxLayout* addBtnL = new QHBoxLayout();
+    addBtn->setFixedSize(30, 30);
+    addBtn->setStyleSheet("background-color: #5eba7d; color: white; font-size: 25px;");
+    QSpacerItem* addBtnSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    addBtnL->addSpacerItem(addBtnSpacer);
+    addBtnL->addWidget(addBtn);
+    centralL->addLayout(addBtnL);
+    connect(addBtn, &QPushButton::clicked,
+            this, &BaseWindow::disable);
+
+    AddPublicationWindow *newPublicationWindow = new AddPublicationWindow(db, this);
+    connect(addBtn, &QPushButton::clicked,
+            newPublicationWindow, &AddPublicationWindow::init);
+    connect(newPublicationWindow, &AddPublicationWindow::window_closed,
+            this, &BaseWindow::enable);
+
     show();
+    update_tab_table(0);
 }
 
 QTableView* MainWindow::create_table(QWidget* parent){

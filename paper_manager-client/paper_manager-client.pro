@@ -15,6 +15,7 @@ SOURCES += \
     loginwindow.cpp \
     errorwindow.cpp \
     basewindow.cpp \
+    tabitemwindow.cpp \
 
 HEADERS += \
     psqlinterface.h \
@@ -22,6 +23,7 @@ HEADERS += \
     loginwindow.h \
     errorwindow.h \
     basewindow.h \
+    tabitemwindow.h \
 
 # Directories
 

@@ -1,5 +1,7 @@
 #include "basewindow.h"
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QSpacerItem>
 
 BaseWindow::BaseWindow(PSQLInterface *psqli, const char *ch, QWidget *parent)
     : QMainWindow()
@@ -17,6 +19,7 @@ BaseWindow::BaseWindow(PSQLInterface *psqli, const char *ch, QWidget *parent)
                     this, &BaseWindow::disable);
     QObject::connect(errorWindow, &ErrorWindow::message_closed,
                     this, &BaseWindow::enable);
+
 }
 BaseWindow::~BaseWindow(){}
 

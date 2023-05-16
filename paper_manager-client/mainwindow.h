@@ -22,6 +22,7 @@ private:
     QTableView *ar_table;
     QTableView *pr_table;
     QTableView *cn_table;
+    QPushButton *addBtn;
 
     QTableView* create_table(QWidget* parent); 
 
