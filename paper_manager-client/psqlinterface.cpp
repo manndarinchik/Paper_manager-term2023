@@ -22,9 +22,10 @@ void PSQLInterface::connect_to_bd(QString login, QString pswd){
      
 }
 
-bool PSQLInterface::issue_query(QString query){
+QSqlQueryModel* PSQLInterface::issue_query(QString query){
     QSqlQueryModel* model = new QSqlQueryModel();
     model->setQuery(query);
+    return model;
 }
 
 bool PSQLInterface::isOpen() {return db.isOpen();}

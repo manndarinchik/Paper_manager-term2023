@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "psqlinterface.h"
 #include <QVBoxLayout>
-#include <QTableWidget>
+#include <QTableView>
 
 MainWindow::MainWindow(PSQLInterface *psqli) 
     : BaseWindow(psqli, "Публикации"){}
@@ -10,44 +10,53 @@ void MainWindow::init(){
     this->resize(800, 500);
 
     QTabWidget *tabsWidget = new QTabWidget();
-    QWidget *pn_tab = new QWidget;
+    
+    pn_tab = new QWidget();
+    pn_table = create_table(pn_tab);
     tabsWidget->addTab(pn_tab, QString("Публикации"));
-    QVBoxLayout *pn_lo = new QVBoxLayout(pn_tab);
-    QStringList pn_labels;
-    pn_labels << "Название" << "Тип" << "Дата" << "Авторы" << "Издательство";
-    QTableWidget* pn_table = new QTableWidget(0, pn_labels.length());
-    pn_lo->addWidget(pn_table);
-    pn_table->setHorizontalHeaderLabels(pn_labels);
 
-    QWidget *ar_tab = new QWidget;
+    ar_tab = new QWidget;
+    ar_table = create_table(ar_tab);
     tabsWidget->addTab(ar_tab, QString("Авторы"));
-    QVBoxLayout *ar_lo = new QVBoxLayout(ar_tab);
-    QStringList ar_labels;
-    ar_labels << "ФИО" << "Положение" << "Статьи" << "Препринты" << "Монографии" << "Диссертации" << "Патенты" << "Отчеты";
-    QTableWidget* ar_table = new QTableWidget(0, ar_labels.length());
-    ar_lo->addWidget(ar_table);
-    ar_table->setHorizontalHeaderLabels(ar_labels);
 
-    QWidget *pr_tab = new QWidget;
+    pr_tab = new QWidget;
+    pr_table = create_table(pr_tab);
     tabsWidget->addTab(pr_tab, QString("Издательства"));
-    QVBoxLayout *pr_lo = new QVBoxLayout(pr_tab);
-    QStringList pr_labels;
-    pr_labels << "Название" << "Аббревиатура" << "Страна" << "Город" << "Адрес" << "Контактный номер" << "Эл. почта";
-    QTableWidget* pr_table = new QTableWidget(0, pr_labels.length());
-    pr_lo->addWidget(pr_table);
-    pr_table->setHorizontalHeaderLabels(pr_labels);
 
-    QWidget *cn_tab = new QWidget;
+    cn_tab = new QWidget;
+    cn_table = create_table(cn_tab);
     tabsWidget->addTab(cn_tab, QString("Сборники"));
-    QVBoxLayout *cn_lo = new QVBoxLayout(cn_tab);
-    QStringList cn_labels;
-    cn_labels << "Название" << "Дата" << "Издательство" << "Публикации";
-    QTableWidget* cn_table = new QTableWidget(0, cn_labels.length());
-    cn_lo->addWidget(cn_table);
-    cn_table->setHorizontalHeaderLabels(cn_labels);
+
+    connect(tabsWidget, &QTabWidget::currentChanged,
+            this, &MainWindow::update_tab_table);
 
     centralL->addWidget(tabsWidget);  
 
     show();
 }
 
+
+QTableView* MainWindow::create_table(QWidget* parent){
+    QTableView* table = new QTableView();
+    QVBoxLayout *layout = new QVBoxLayout(parent);
+    layout->addWidget(table);
+    return table;
+}
+
+void MainWindow::update_tab_table(int index){
+    switch (index)
+    {
+    case 0:
+        pn_table->setModel(db->issue_query(QString("SELECT * FROM PUBLICATION_COMPOSITE"))); break;
+    case 1:
+        ar_table->setModel(db->issue_query(QString("SELECT * FROM AUTHOR_COMPOSITE"))); break;
+    case 2:
+        pr_table->setModel(db->issue_query(QString("SELECT * FROM PUBLISHER"))); break;
+    case 3:
+        cn_table->setModel(db->issue_query(QString("SELECT * FROM COMPILATION_COMPOSITE"))); break;
+    
+    default:
+        break;
+    }
+
+}

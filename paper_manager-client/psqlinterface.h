@@ -11,7 +11,7 @@ class PSQLInterface : public QObject
     public:
     PSQLInterface();
     ~PSQLInterface();
-    static bool issue_query(QString query);
+    QSqlQueryModel* issue_query(QString query);
     bool isOpen();
 
     public slots:
