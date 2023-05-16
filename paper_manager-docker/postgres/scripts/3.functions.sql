@@ -33,7 +33,7 @@ $$
 BEGIN
 	DELETE FROM AUTHOR_STATS WHERE authorID = removeID;
 END;
-$$ LANGUAGE  plpgsql security definer security definer;
+$$ LANGUAGE  plpgsql security definer;
 
 /* PUBLICATION */
 CREATE OR REPLACE PROCEDURE add_publication(
