@@ -17,9 +17,14 @@ signals:
 
 public slots:
     void invoke_window(QString message);
+    
 private slots:
     void close_message();
+
 private:
     QLabel *error_message;
+
+protected:
+    void closeEvent(QCloseEvent *event);
 };
 #endif //ERRORWINDOW_H

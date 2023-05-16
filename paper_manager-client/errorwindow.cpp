@@ -2,6 +2,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QPushButton>
+#include <QCloseEvent>
 
 ErrorWindow::ErrorWindow(QWidget *parent)
     : QMainWindow(parent) 
@@ -39,5 +40,10 @@ void ErrorWindow::invoke_window(QString message){
 void ErrorWindow::close_message(){
     error_message->setText("");
     this->close(); 
-    emit message_closed();
+}
+    
+void ErrorWindow::closeEvent(QCloseEvent *event)
+{
+      emit message_closed();
+      event->accept();
 }
