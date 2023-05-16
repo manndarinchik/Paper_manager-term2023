@@ -1,13 +1,13 @@
 #include "errorwindow.h"
 #include <QVBoxLayout>
+#include <QWidget>
 #include <QPushButton>
 
 ErrorWindow::ErrorWindow(QWidget *parent)
     : QMainWindow(parent) 
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    resize(300, 100);
-    setWindowTitle("Ошибка");
+
     QWidget *centralWidget = new QWidget;
     this->setCentralWidget(centralWidget);
     QVBoxLayout *centralLayout = new QVBoxLayout(centralWidget);
@@ -29,6 +29,10 @@ ErrorWindow::~ErrorWindow(){
 void ErrorWindow::invoke_window(QString message){
     error_message->setText(message);
     this->show();
+    QPoint p = parentWidget()->pos();
+    QPoint pCenter(parentWidget()->frameSize().width()/2, parentWidget()->frameSize().height()/2);
+    QPoint sCenter(frameSize().width()/2, frameSize().height()/2);
+    move(p + pCenter-sCenter);
     emit message_shown();
 }
 

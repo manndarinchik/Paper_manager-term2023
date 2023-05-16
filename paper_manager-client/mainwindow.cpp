@@ -35,7 +35,6 @@ void MainWindow::init(){
     show();
 }
 
-
 QTableView* MainWindow::create_table(QWidget* parent){
     QTableView* table = new QTableView();
     QVBoxLayout *layout = new QVBoxLayout(parent);
@@ -44,19 +43,32 @@ QTableView* MainWindow::create_table(QWidget* parent){
 }
 
 void MainWindow::update_tab_table(int index){
+    QItemSelectionModel* m[4] = {
+        pn_table->selectionModel(),
+        ar_table->selectionModel(),
+        pr_table->selectionModel(),
+        cn_table->selectionModel()
+    };
+    QSqlQueryModel* model = nullptr;
     switch (index)
     {
     case 0:
-        pn_table->setModel(db->issue_query(QString("SELECT * FROM PUBLICATION_COMPOSITE"))); break;
+        model = query_database("SELECT * FROM PUBLICATION_COMPOSITE");
+        if (model != nullptr) pn_table->setModel(model);
+        break;
     case 1:
-        ar_table->setModel(db->issue_query(QString("SELECT * FROM AUTHOR_COMPOSITE"))); break;
+        model = query_database("SELECT * FROM AUTHOR_COMPOSITE");
+        if (model != nullptr) ar_table->setModel(model);
+        break;
     case 2:
-        pr_table->setModel(db->issue_query(QString("SELECT * FROM PUBLISHER"))); break;
+        model = query_database("SELECT * FROM PUBLISH_ER");
+        if (model != nullptr) pr_table->setModel(model);
+        break;
     case 3:
-        cn_table->setModel(db->issue_query(QString("SELECT * FROM COMPILATION_COMPOSITE"))); break;
-    
-    default:
+        model = query_database("bruh");
+        if (model != nullptr) cn_table->setModel(model);
         break;
     }
 
+    for (int i = 0; i < 4; ++i) delete m[i];
 }

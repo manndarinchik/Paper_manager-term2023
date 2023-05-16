@@ -19,3 +19,26 @@ BaseWindow::BaseWindow(PSQLInterface *psqli, const char *ch, QWidget *parent)
                     this, &BaseWindow::enable);
 }
 BaseWindow::~BaseWindow(){}
+
+QSqlQueryModel* BaseWindow::query_database(const char *ch)
+{
+    QSqlQueryModel* model = db->issue_query(QString(ch));
+    QSqlError error = model->lastError();
+    switch (error.type())
+    {
+    case QSqlError::NoError:
+        return model; break;
+    case QSqlError::ConnectionError:
+        show_error("Не удалось подключиться к базе данных"); break;
+    case QSqlError::StatementError:
+        show_error("Неверный запрос к базе данных, обратитесь к администратору."); break;
+    case QSqlError::TransactionError:
+        show_error("Ошибка транзакции, обратитесь к администратору."); break;
+    case QSqlError::UnknownError:
+        show_error("Неизвестная ошибка, обратитесь к администратору."); break;
+    default:
+        break;
+    }
+    delete model;
+    return nullptr;
+}

@@ -20,12 +20,14 @@ protected:
     QVBoxLayout *centralL;
     ErrorWindow *errorWindow;
 
+    QSqlQueryModel* query_database(const char *ch);
+
 signals:
     void show_error(QString message);
 
 public slots:
-    void disable(){this->setEnabled(false); errorWindow->setEnabled(true);}
-    void enable(){this->setEnabled(true);}
+    void disable(){setEnabled(false); errorWindow->setEnabled(true);}
+    void enable(){setEnabled(true);}
 };
 
 #endif
