@@ -16,12 +16,10 @@ public:
 
 signals:
     void login_successful();
-    void error_called(QString message);
 
 private slots:
     void on_login_clicked();
     
-
 private:
     QLineEdit *login_input;
     QLineEdit *pswd_input;

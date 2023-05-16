@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QLayout>
 #include <psqlinterface.h>
+#include "errorwindow.h"
 
 class BaseWindow : public QMainWindow
 {
@@ -17,10 +18,13 @@ protected:
     PSQLInterface *db;
     QWidget *centralW;
     QVBoxLayout *centralL;
+    ErrorWindow *errorWindow;
 
+signals:
+    void show_error(QString message);
 
 public slots:
-    void disable(){this->setEnabled(false);}
+    void disable(){this->setEnabled(false); errorWindow->setEnabled(true);}
     void enable(){this->setEnabled(true);}
 };
 

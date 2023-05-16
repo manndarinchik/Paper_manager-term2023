@@ -52,7 +52,7 @@ void LoginWindow::on_login_clicked(){
         close();
         login_successful();
     } else {
-        emit error_called(QString("Ошибка авторизации"));
+        emit show_error(QString("Ошибка авторизации"));
     }
 }
 

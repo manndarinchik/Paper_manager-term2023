@@ -8,7 +8,7 @@ class ErrorWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    ErrorWindow(QWidget *parent = nullptr);
+    ErrorWindow(QWidget *parent);
     ~ErrorWindow();
 
 signals:
