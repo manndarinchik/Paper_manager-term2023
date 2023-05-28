@@ -61,13 +61,3 @@ JOIN PUBLISHER p ON c.publisherID = p.publisherID
 LEFT JOIN (SELECT compilationID, COUNT(*) publicationCount
 	  FROM COMPILATION_ENTRY GROUP BY compilationID)
 	  AS tmp ON tmp.compilationID = c.compilationID;
-
-/* --- DATA MANAGEMENT VIEWS --- */
-CREATE OR REPLACE VIEW PUBLICATION_DATA AS
-SELECT
-    pc.publicationID,
-	pc.publisherID,
-	STRING_AGG(CAST(pa.authorID AS TEXT), ' ') authorIDs
-FROM PUBLICATION pc
-JOIN PUBLICATION_AUTHORS pa ON pa.publicationID = pc.publicationID
-GROUP BY pc.publicationID HAVING STRING_AGG(CAST(pa.authorID AS TEXT), ' ') IS NOT NULL;

@@ -224,14 +224,16 @@ RETURNS SETOF PUBLICATION_COMPOSITE AS $$ BEGIN
 		WHERE regexp_count(authors, (SELECT name FROM AUTHOR WHERE authorID=_ID)) > 0;
 END; $$ LANGUAGE  plpgsql security definer;
 
-CREATE FUNCTION get_publication_authors(_id INT)
+CREATE OR REPLACE FUNCTION get_publication_authors(_id INT)
 RETURNS SETOF AUTHOR AS $$ BEGIN
 	RETURN QUERY 
 		SELECT a.*
 		FROM AUTHOR a
-		JOIN PUBLICATION_AUTHORS pa ON a.authorID = pa.authorID
-		WHERE pa.publicationID = _id;
+		WHERE authorID = ANY(
+			SELECT authorID FROM PUBLICATION_AUTHORS pa WHERE pa.publicationID = _id);
 END; $$ LANGUAGE  plpgsql security definer;
+
+SELECT * FROM get_publication_authors(3);
 
 CREATE OR REPLACE FUNCTION get_publication_compilations(_id INT)
 RETURNS SETOF COMPILATION_COMPOSITE AS $$ BEGIN
