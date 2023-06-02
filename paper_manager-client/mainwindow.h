@@ -33,6 +33,8 @@ public slots:
 
 private slots:
     void update_tab_table(int index);
-
+    void show_publication_window(int id = -1);
+    void edit_publication(const QModelIndex &index);
+    void delete_child_window(QMainWindow* ptr);
 };
 #endif // MAINWINDOW_H

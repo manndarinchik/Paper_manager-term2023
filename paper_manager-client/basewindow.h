@@ -22,7 +22,7 @@ protected:
     QVBoxLayout *centralL;
     ErrorWindow *errorWindow;
 
-    QSqlQueryModel* query_database(const char *ch); 
+    QSqlQueryModel* query_database(QString query); 
     void closeEvent(QCloseEvent *event){emit window_closed(); event->accept();}
 
 signals:

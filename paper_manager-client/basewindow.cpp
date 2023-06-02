@@ -23,9 +23,9 @@ BaseWindow::BaseWindow(PSQLInterface *psqli, const char *ch, QWidget *parent)
 }
 BaseWindow::~BaseWindow(){}
 
-QSqlQueryModel* BaseWindow::query_database(const char *ch)
+QSqlQueryModel* BaseWindow::query_database(QString query)
 {
-    QSqlQueryModel* model = db->issue_query(QString(ch));
+    QSqlQueryModel* model = db->issue_query(query);
     QSqlError error = model->lastError();
     switch (error.type())
     {

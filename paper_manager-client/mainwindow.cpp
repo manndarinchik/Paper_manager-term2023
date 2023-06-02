@@ -3,6 +3,7 @@
 #include "tabitemwindow.h"
 #include <QVBoxLayout>
 #include <QTableView>
+#include <QHeaderView>
 
 MainWindow::MainWindow(PSQLInterface *psqli) 
     : BaseWindow(psqli, "Публикации"){}
@@ -15,6 +16,8 @@ void MainWindow::init(){
     pn_tab = new QWidget();
     pn_table = create_table(pn_tab);
     tabsWidget->addTab(pn_tab, QString("Публикации"));
+    connect(pn_table, &QTableView::doubleClicked,
+            this, &MainWindow::edit_publication);
 
     ar_tab = new QWidget;
     ar_table = create_table(ar_tab);
@@ -45,11 +48,8 @@ void MainWindow::init(){
     connect(addBtn, &QPushButton::clicked,
             this, &BaseWindow::disable);
 
-    AddPublicationWindow *newPublicationWindow = new AddPublicationWindow(db, this);
     connect(addBtn, &QPushButton::clicked,
-            newPublicationWindow, &AddPublicationWindow::init);
-    connect(newPublicationWindow, &AddPublicationWindow::window_closed,
-            this, &BaseWindow::enable);
+            this, [=]{this->MainWindow::show_publication_window(-1);});
 
     show();
     update_tab_table(0);
@@ -57,8 +57,11 @@ void MainWindow::init(){
 
 QTableView* MainWindow::create_table(QWidget* parent){
     QTableView* table = new QTableView();
+    table->verticalHeader()->hide();
+    table->setColumnHidden(0, true);
     QVBoxLayout *layout = new QVBoxLayout(parent);
     layout->addWidget(table);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
     return table;
 }
 
@@ -92,3 +95,21 @@ void MainWindow::update_tab_table(int index){
 
     for (int i = 0; i < 4; ++i) delete m[i];
 }
+
+void MainWindow::show_publication_window(int id){
+    PublicationViewWindow *newPublicationWindow = new PublicationViewWindow(db, this, id, true);
+    connect(newPublicationWindow, &PublicationViewWindow::window_closed,
+            this, &BaseWindow::enable);
+    connect(newPublicationWindow, &PublicationViewWindow::window_closed,
+            this, [=](){this->delete_child_window(newPublicationWindow);});
+}
+
+void MainWindow::delete_child_window(QMainWindow* ptr){
+    delete ptr;
+}
+
+void MainWindow::edit_publication(const QModelIndex &index){
+    QModelIndex selected_row = pn_table->selectionModel()->selectedRows(0)[0];
+    show_publication_window(selected_row.data().toInt());
+}
+
