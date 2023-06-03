@@ -1,97 +1,83 @@
 /* AUTHOR */
-CREATE OR REPLACE PROCEDURE add_author(
+CREATE OR REPLACE FUNCTION add_author(
 	newName VARCHAR(200),
-	newDegree VARCHAR(30) DEFAULT NULL
-) AS
+	newDegree VARCHAR(30)
+) RETURNS int AS
 $$
+DECLARE res INT;
 BEGIN
 	-- TODO: проверка на наличие имени
-	INSERT INTO AUTHOR(name, degree) VALUES(newName, newDegree);
+	INSERT INTO AUTHOR(name, degree) VALUES(newName, newDegree)
+	RETURNING authorID INTO res;
+	RETURN res;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
-CREATE OR REPLACE PROCEDURE edit_author(
+CREATE OR REPLACE FUNCTION edit_author(
 	editID int,
-	newName VARCHAR(200) DEFAULT NULL,
-	newDegree VARCHAR(30) DEFAULT NULL
-) AS
+	newName VARCHAR(200),
+	newDegree VARCHAR(30) 
+) RETURNS void AS
 $$
 BEGIN
-	IF newName IS NOT NULL THEN
-		UPDATE AUTHOR SET name = newName WHERE authorID = editID;
-	END IF;
-	IF newDegree IS NOT NULL THEN
-		UPDATE AUTHOR SET degree = newDegree WHERE authorID = editID;
-	END IF;
+	UPDATE AUTHOR 
+		SET name = newName,
+		degree = newDegree 
+	WHERE authorID = editID;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
-CREATE OR REPLACE PROCEDURE remove_author(
+CREATE OR REPLACE FUNCTION remove_author(
 	removeID int
-) AS
+) RETURNS void AS
 $$
 BEGIN
 	DELETE FROM AUTHOR_STATS WHERE authorID = removeID;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
 /* PUBLICATION */
-CREATE OR REPLACE PROCEDURE add_publication(
+CREATE OR REPLACE FUNCTION add_publication(
 	newName VARCHAR(200),
-	newType SMALLINT,
-	newPublisher INT,
-	newDate DATE DEFAULT NULL
-) AS
-$$
-BEGIN
-	-- TODO: проверка на наличие имени
-	INSERT INTO PUBLICATION(name, type, publisherID, publicationDate) VALUES(newName, newType, newPublisher, newDate);
-END;
-$$ LANGUAGE  plpgsql security definer;
-CREATE OR REPLACE PROCEDURE add_publication(
-	newName VARCHAR(200),
-	newType INT, /*Почему psql неявно не приводит int в smalint..................*/
+	newType INT,
 	newPublisher INT,
 	newDate DATE
-) AS
+) RETURNS int AS
 $$
+DECLARE res INT;
 BEGIN
-	INSERT INTO PUBLICATION(name, type, publisherID, publicationDate) VALUES(newName, CAST (newType AS INT), newPublisher, newDate);
+	INSERT INTO PUBLICATION(name, type, publisherID, publicationDate) VALUES(newName, CAST (newType AS SMALLINT), newPublisher, newDate)
+	RETURNING publicationID INTO res;
+	RETURN res;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE PROCEDURE edit_publication(
+CREATE OR REPLACE FUNCTION edit_publication(
 	editID int,
-	newName VARCHAR(200) DEFAULT NULL,
-	newType SMALLINT DEFAULT NULL,
-	newPublisher INT DEFAULT NULL,
-	newDate DATE DEFAULT NULL
-) AS
+	newName VARCHAR(200),
+	newType INT,
+	newPublisher INT,
+	newDate DATE
+) RETURNS void AS
 $$
 BEGIN
-	IF newName IS NOT NULL THEN
-		UPDATE PUBLICATION SET name = newName WHERE publicationID = editID;
-	END IF;
-	IF newType IS NOT NULL THEN
-		UPDATE PUBLICATION SET type = newType WHERE publicationID = editID;
-	END IF;
-	IF newPublisher IS NOT NULL THEN
-		UPDATE PUBLICATION SET publisherID = newPublisher WHERE publicationID = editID;
-	END IF;
-	IF newDate IS NOT NULL THEN
-		UPDATE PUBLICATION SET publicationDate = newDate WHERE publicationID = editID;
-	END IF;
+	UPDATE PUBLICATION 
+		SET name = newName,
+		type = CAST(newType AS SMALLINT),
+		publisherID = newPublisher,
+		publicationDate = newDate
+	WHERE publicationID = editID;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
-CREATE OR REPLACE PROCEDURE remove_publication(
+CREATE OR REPLACE FUNCTION remove_publication(
 	removeID int
-) AS
+) RETURNS void AS
 $$
 BEGIN
 	DELETE FROM PUBLICATION WHERE publicationID = removeID;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
 CREATE OR REPLACE PROCEDURE set_publication_authors(
 	editID INT,
@@ -110,90 +96,84 @@ BEGIN
 	THEN ROLLBACK; END IF;
 	-- TODO: raise error;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
 
 /* PUBLISHER */
-CREATE OR REPLACE PROCEDURE add_publisher(
+CREATE OR REPLACE FUNCTION add_publisher(
 	newName VARCHAR(200),
-	newCountry VARCHAR(100) DEFAULT NULL,
-	newCity VARCHAR(100) DEFAULT NULL,
-	newAddress VARCHAR(100) DEFAULT NULL,
-	newPhoneNumber VARCHAR(13) DEFAULT NULL,
-	newEmail VARCHAR(100) DEFAULT NULL
-) AS
+	newCountry VARCHAR(100),
+	newCity VARCHAR(100),
+	newAddress VARCHAR(100),
+	newPhoneNumber VARCHAR(13),
+	newEmail VARCHAR(100)
+) RETURNS int AS
 $$
 DECLARE res INT;
 BEGIN
 	-- TODO: проверка на наличие имени
 	INSERT INTO PUBLISHER(fullName, country, city, address, phoneNumber, email)
-	VALUES(newName, newCountry, newCity, newAddress, newPhoneNumber, newEmail);
+	VALUES(newName, newCountry, newCity, newAddress, newPhoneNumber, newEmail)
+	RETURNING publisherID INTO res;
+	RETURN res;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
-CREATE OR REPLACE PROCEDURE edit_publisher(
+CREATE OR REPLACE FUNCTION edit_publisher(
 	editID int,
-	newName VARCHAR(200) DEFAULT NULL,
-	newCountry VARCHAR(100) DEFAULT NULL,
-	newCity VARCHAR(100) DEFAULT NULL,
-	newAddress VARCHAR(100) DEFAULT NULL,
-	newPhoneNumber VARCHAR(13) DEFAULT NULL,
-	newEmail VARCHAR(100) DEFAULT NULL
-) AS
+	newName VARCHAR(200),
+	newCountry VARCHAR(100),
+	newCity VARCHAR(100),
+	newAddress VARCHAR(100),
+	newPhoneNumber VARCHAR(13),
+	newEmail VARCHAR(100)
+) RETURNS void AS
 $$
 BEGIN
-	IF newName IS NOT NULL THEN
-		UPDATE PUBLISHER SET fullName = newName WHERE publisherID = editID;
-	END IF;
-	IF newCountry IS NOT NULL THEN
-		UPDATE PUBLISHER SET country = newCountry WHERE publisherID = editID;
-	END IF;
-	IF newCity IS NOT NULL THEN
-		UPDATE PUBLISHER SET city = newCity WHERE publisherID = editID;
-	END IF;
-	IF newAddress IS NOT NULL THEN
-		UPDATE PUBLISHER SET address = newAddress WHERE publisherID = editID;
-	END IF;
-	IF newPhoneNumber IS NOT NULL THEN
-		UPDATE PUBLISHER SET phoneNumber = newPhoneNumber WHERE publisherID = editID;
-	END IF;
-	IF newEmail IS NOT NULL THEN
-		UPDATE PUBLISHER SET email = newEmail WHERE publisherID = editID;
-	END IF;
+	UPDATE PUBLISHER SET fullName = newName,
+		country = newCountry,
+		city = newCity,
+		address = newAddress,
+		phoneNumber = newPhoneNumber,
+		email = newEmail
+	WHERE publisherID = editID;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
 
-CREATE OR REPLACE PROCEDURE remove_publisher(
+CREATE OR REPLACE FUNCTION remove_publisher(
 	removeID int
-) AS
+) RETURNS void AS
 $$
 BEGIN
 	DELETE FROM PUBLISHER WHERE publisherID = removeID;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
 /* COMPILATION */
-CREATE OR REPLACE PROCEDURE add_compilation(
+CREATE OR REPLACE FUNCTION add_compilation(
 	newName VARCHAR(200),
 	newPublisherID INT,
-	newDate DATE DEFAULT NULL
-) AS
+	newDate DATE
+) RETURNS int AS
 $$
+DECLARE res INT;
 BEGIN
 	-- TODO: проверка на наличие имени
-	INSERT INTO COMPILATION(name, publisherID, publicationDate) VALUES (newName, newPublisherID, newDate);
+	INSERT INTO COMPILATION(name, publisherID, publicationDate) VALUES (newName, newPublisherID, newDate)
+	RETURNING compilationID INTO res;
+	RETURN res;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
-CREATE OR REPLACE PROCEDURE remove_compilation(
+CREATE OR REPLACE FUNCTION remove_compilation(
 	removeID int
-) AS
+) RETURNS void AS
 $$
 BEGIN
 	DELETE FROM COMPILATION WHERE compilationID = removeID;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
 CREATE OR REPLACE PROCEDURE set_compilation_publications(
 	editID INT,
@@ -212,7 +192,7 @@ BEGIN
 	THEN ROLLBACK; END IF;
 	-- TODO: raise error;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;
 
 /* QUERY FUNCTIONS */
 
@@ -222,7 +202,7 @@ RETURNS SETOF PUBLICATION_COMPOSITE AS $$ BEGIN
 		SELECT *
 		FROM PUBLICATION_COMPOSITE
 		WHERE regexp_count(authors, (SELECT name FROM AUTHOR WHERE authorID=_ID)) > 0;
-END; $$ LANGUAGE  plpgsql security definer;
+END; $$ LANGUAGE  plpgsql;
 
 CREATE OR REPLACE FUNCTION get_publication_authors(_id INT)
 RETURNS SETOF AUTHOR AS $$ BEGIN
@@ -231,7 +211,7 @@ RETURNS SETOF AUTHOR AS $$ BEGIN
 		FROM AUTHOR a
 		WHERE authorID = ANY(
 			SELECT authorID FROM PUBLICATION_AUTHORS pa WHERE pa.publicationID = _id);
-END; $$ LANGUAGE  plpgsql security definer;
+END; $$ LANGUAGE  plpgsql;
 
 SELECT * FROM get_publication_authors(3);
 
@@ -242,7 +222,7 @@ RETURNS SETOF COMPILATION_COMPOSITE AS $$ BEGIN
 		FROM COMPILATION_COMPOSITE c
 		JOIN COMPILATION_ENTRY ce ON ce.compilationID = c.compilationID
 		WHERE ce.publicationID = _id;
-END; $$ LANGUAGE  plpgsql security definer;
+END; $$ LANGUAGE  plpgsql;
 
 
 CREATE PROCEDURE set_authors_publications(
@@ -291,4 +271,4 @@ BEGIN
 		INSERT INTO PUBLICATION_AUTHORS(authorID, publicationID) VALUES(aID, i.p_id);
 	END LOOP;
 END;
-$$ LANGUAGE  plpgsql security definer;
+$$ LANGUAGE  plpgsql;

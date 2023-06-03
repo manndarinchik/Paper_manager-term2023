@@ -42,24 +42,24 @@ a INT;
 p INT;
 c INT;
 BEGIN
-	CALL add_author(substr(md5(random()::text), 0, 6), s[_random(0, 4)]);
+	PERFORM add_author(substr(md5(random()::text), 0, 6), s[_random(0, 4)]);
 	select authorID into a FROM author order by authorID desc limit 1;
-	CALL add_publisher(substr(md5(random()::text), 0, 20), substr(md5(random()::text), 0, 8), substr(md5(random()::text), 0, 10), substr(md5(random()::text), 0, 11), substr(md5(random()::text), 0, 10));
+	PERFORM add_publisher(substr(md5(random()::text), 0, 20), substr(md5(random()::text), 0, 8), substr(md5(random()::text), 0, 10), substr(md5(random()::text), 0, 11), substr(md5(random()::text), 0, 10), substr(md5(random()::text), 0, 11));
 	select publisherID into p FROM publisher order by publisherID desc limit 1;
-	CALL add_compilation(substr(md5(random()::text), 0, 15), p, current_date - (random() * 365*10)::int);
+	PERFORM add_compilation(substr(md5(random()::text), 0, 15), p, current_date - (random() * 365*10)::int);
 	select compilationID into c FROM compilation order by compilationID desc limit 1;
-	
+
 	FOR i IN 1..pubCount LOOP
 		if random() > 0.1 then
-			call add_publication(
+			PERFORM  add_publication(
 				substr(md5(random()::text), 0, 30),
 				_random(0, 5),
 				_random(1, p),
 				current_date - (random() * 365*10)::int);
 		else
-			CALL add_publisher(substr(md5(random()::text), 0, 20), substr(md5(random()::text), 0, 8), substr(md5(random()::text), 0, 10), substr(md5(random()::text), 0, 11), substr(md5(random()::text), 0, 10));
+			PERFORM add_publisher(substr(md5(random()::text), 0, 20), substr(md5(random()::text), 0, 8), substr(md5(random()::text), 0, 10), substr(md5(random()::text), 0, 11), substr(md5(random()::text), 0, 10), substr(md5(random()::text), 0, 11));
 			p = p + 1;
-			call add_publication(
+			PERFORM  add_publication(
 				substr(md5(random()::text), 0, 30),
 				_random(0, 5),
 				p,
@@ -70,7 +70,7 @@ BEGIN
 			if random() > 0.1 then
 				insert into publication_authors(publicationID, authorID) values(i, _random(1, a));
 			else		
-				CALL add_author(substr(md5(random()::text), 0, 6), s[_random(0, 5)]);
+				PERFORM  add_author(substr(md5(random()::text), 0, 6), s[_random(0, 5)]);
 				a = a + 1;
 				insert into publication_authors(publicationID, authorID) values(i, a);
 			end if;
@@ -81,7 +81,7 @@ BEGIN
 				if random() > 0.2 then
 					insert into compilation_entry(publicationID, compilationID) values(i, _random(1, c));
 				else		
-					CALL add_compilation(substr(md5(random()::text), 0, 15), _random(1, p), current_date - (random() * 365*10)::int);
+					PERFORM  add_compilation(substr(md5(random()::text), 0, 15), _random(1, p), current_date - (random() * 365*10)::int);
 					c = c + 1;
 					insert into compilation_entry(publicationID, compilationID) values(i, c);
 				end if;
@@ -91,6 +91,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+SELECT generate_data(10);
+
 /*
 TRUNCATE TABLE PUBLICATION RESTART IDENTITY CASCADE;
 TRUNCATE TABLE AUTHOR RESTART IDENTITY CASCADE;
@@ -98,7 +100,6 @@ TRUNCATE TABLE PUBLISHER RESTART IDENTITY CASCADE;
 TRUNCATE TABLE COMPILATION RESTART IDENTITY CASCADE;
 */
 
-SELECT generate_data(1000);
 
 
 /*
