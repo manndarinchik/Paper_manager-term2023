@@ -4,8 +4,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
-#include "psqlinterface.h"
-#include "basewindow.h"
+#include "PSQLinterface.h"
+#include "BaseWindow.h"
 
 class LoginWindow : public BaseWindow
 {

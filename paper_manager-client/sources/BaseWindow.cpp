@@ -1,4 +1,4 @@
-#include "basewindow.h"
+#include "BaseWindow.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSpacerItem>

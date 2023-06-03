@@ -7,23 +7,9 @@ INCLUDEPATH += .
 
 QT += core gui widgets sql
 
+SOURCES_DIR += ./sources
 
-SOURCES += \
-    main.cpp \
-    psqlinterface.cpp \
-    mainwindow.cpp \
-    loginwindow.cpp \
-    errorwindow.cpp \
-    basewindow.cpp \
-    tabitemwindow.cpp \
-
-HEADERS += \
-    psqlinterface.h \
-    mainwindow.h \
-    loginwindow.h \
-    errorwindow.h \
-    basewindow.h \
-    tabitemwindow.h \
+HEADERS_DIR += ./headers
 
 # Directories
 

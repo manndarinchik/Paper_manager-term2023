@@ -1,5 +1,5 @@
-#include "loginwindow.h"
-#include "psqlinterface.h"
+#include "LoginWindow.h"
+#include "PSQLinterface.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>

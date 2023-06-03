@@ -1,7 +1,7 @@
-#include "mainwindow.h"
-#include "loginwindow.h"
-#include "errorwindow.h"
-#include "psqlinterface.h"
+#include "MainWindow.h"
+#include "LoginWindow.h"
+#include "ErrorWindow.h"
+#include "PSQLinterface.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])

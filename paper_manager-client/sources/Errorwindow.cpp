@@ -1,4 +1,4 @@
-#include "errorwindow.h"
+#include "ErrorWindow.h"
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QPushButton>

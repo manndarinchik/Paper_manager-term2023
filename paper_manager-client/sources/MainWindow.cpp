@@ -1,6 +1,6 @@
-#include "mainwindow.h"
-#include "psqlinterface.h"
-#include "tabitemwindow.h"
+#include "MainWindow.h"
+#include "PSQLinterface.h"
+#include "ItemViewWindow.h"
 #include <QVBoxLayout>
 #include <QTableView>
 #include <QHeaderView>
@@ -45,8 +45,6 @@ void MainWindow::init(){
     addBtnL->addSpacerItem(addBtnSpacer);
     addBtnL->addWidget(addBtn);
     centralL->addLayout(addBtnL);
-    connect(addBtn, &QPushButton::clicked,
-            this, &BaseWindow::disable);
 
     connect(addBtn, &QPushButton::clicked,
             this, [=]{this->MainWindow::show_publication_window(-1);});
@@ -62,6 +60,7 @@ QTableView* MainWindow::create_table(QWidget* parent){
     QVBoxLayout *layout = new QVBoxLayout(parent);
     layout->addWidget(table);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     return table;
 }
 
@@ -98,10 +97,9 @@ void MainWindow::update_tab_table(int index){
 
 void MainWindow::show_publication_window(int id){
     PublicationViewWindow *newPublicationWindow = new PublicationViewWindow(db, this, id, true);
+    disable();
     connect(newPublicationWindow, &PublicationViewWindow::window_closed,
-            this, &BaseWindow::enable);
-    connect(newPublicationWindow, &PublicationViewWindow::window_closed,
-            this, [=](){this->delete_child_window(newPublicationWindow);});
+            this, [=](){this->delete_child_window(newPublicationWindow); this->enable();});
 }
 
 void MainWindow::delete_child_window(QMainWindow* ptr){

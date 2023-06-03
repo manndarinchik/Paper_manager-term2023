@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 #include <QTableWidget>
-#include "basewindow.h"
-#include "psqlinterface.h"
+#include "BaseWindow.h"
+#include "PSQLinterface.h"
 
 class MainWindow : public BaseWindow
 {

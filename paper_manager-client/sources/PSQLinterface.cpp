@@ -1,4 +1,4 @@
-#include "psqlinterface.h"
+#include "PSQLinterface.h"
 #include <QtSql>
 
 PSQLInterface::PSQLInterface(){}

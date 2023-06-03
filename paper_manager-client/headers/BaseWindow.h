@@ -3,10 +3,10 @@
 
 #include <QMainWindow>
 #include <QLayout>
-#include <psqlinterface.h>
+#include <PSQLinterface.h>
 #include <QPushButton>
 #include <QCloseEvent>
-#include "errorwindow.h"
+#include "ErrorWindow.h"
 
 class BaseWindow : public QMainWindow
 {
