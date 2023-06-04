@@ -166,6 +166,23 @@ BEGIN
 END;
 $$ LANGUAGE  plpgsql;
 
+CREATE OR REPLACE FUNCTION edit_compilation(
+	cID INT,
+	newName VARCHAR(200),
+	newPublisherID INT,
+	newDate DATE
+) RETURNS void AS
+$$
+DECLARE res INT;
+BEGIN
+	UPDATE COMPILATION SET
+		name = newName,
+		publisherID = newPublisherID, 
+		publicationDate = newDate
+	WHERE compilationID = cID;
+END;
+$$ LANGUAGE  plpgsql;
+
 CREATE OR REPLACE FUNCTION remove_compilation(
 	removeID int
 ) RETURNS void AS
