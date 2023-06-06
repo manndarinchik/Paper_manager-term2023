@@ -230,8 +230,6 @@ RETURNS SETOF AUTHOR AS $$ BEGIN
 			SELECT authorID FROM PUBLICATION_AUTHORS pa WHERE pa.publicationID = _id);
 END; $$ LANGUAGE  plpgsql;
 
-SELECT * FROM get_publication_authors(3);
-
 CREATE OR REPLACE FUNCTION get_publication_compilations(_id INT)
 RETURNS SETOF COMPILATION_COMPOSITE AS $$ BEGIN
 	RETURN QUERY 
@@ -289,3 +287,16 @@ BEGIN
 	END LOOP;
 END;
 $$ LANGUAGE  plpgsql;
+
+CREATE OR REPLACE FUNCTION can_edit(username NAME)
+RETURNS bool AS
+$$
+DECLARE roles name[];
+BEGIN
+	SELECT array_agg(rolname) INTO roles FROM pg_user
+	JOIN pg_auth_members ON (pg_user.usesysid=pg_auth_members.member)
+	JOIN pg_roles ON (pg_roles.oid=pg_auth_members.roleid)
+	GROUP BY pg_user.usename having pg_user.usename=username;	
+	return ('{"editor_role"}' && roles);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

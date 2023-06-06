@@ -4,8 +4,8 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
-LoginWindow::LoginWindow(PSQLInterface *psqli, QWidget *parent)
-    : BaseWindow(psqli, "Вход", parent)
+LoginWindow::LoginWindow(PSQLInterface *psqli)
+    : BaseWindow(psqli, "Вход")
 {
     this->resize(300, 200);
 
@@ -46,7 +46,7 @@ void LoginWindow::on_login_clicked(){
     QString pswd = pswd_input->text();
 
     db->connect_to_bd(login, pswd);
-    qDebug() << login << pswd << db->isOpen();
+    // qDebug() << login << pswd << db->isOpen();
 
     if (db->isOpen()){
         close();
@@ -55,4 +55,3 @@ void LoginWindow::on_login_clicked(){
         emit show_error(QString("Ошибка авторизации"));
     }
 }
-

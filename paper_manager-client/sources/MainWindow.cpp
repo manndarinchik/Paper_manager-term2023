@@ -6,9 +6,7 @@
 #include <QHeaderView>
 
 MainWindow::MainWindow(PSQLInterface *psqli) 
-    : BaseWindow(psqli, "Публикации"){}
-
-void MainWindow::init(){
+    : BaseWindow(psqli, "Публикации"){
     this->resize(800, 500);
 
     QTabWidget *tabsWidget = new QTabWidget();
@@ -16,8 +14,9 @@ void MainWindow::init(){
     pn_tab = new QWidget();
     pn_table = create_table(pn_tab);
     tabsWidget->addTab(pn_tab, QString("Публикации"));
-    connect(pn_table, &QTableView::doubleClicked,
-            this, &MainWindow::edit_publication);
+    if (can_edit)
+        connect(pn_table, &QTableView::doubleClicked,
+                this, &MainWindow::edit_publication);
 
     ar_tab = new QWidget;
     ar_table = create_table(ar_tab);
@@ -36,18 +35,19 @@ void MainWindow::init(){
 
     centralL->addWidget(tabsWidget);  
 
-    addBtn = new QPushButton();
-    addBtn->setText("+");
-    QHBoxLayout* addBtnL = new QHBoxLayout();
-    addBtn->setFixedSize(30, 30);
-    addBtn->setStyleSheet("background-color: #5eba7d; color: white; font-size: 25px;");
-    QSpacerItem* addBtnSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    addBtnL->addSpacerItem(addBtnSpacer);
-    addBtnL->addWidget(addBtn);
-    centralL->addLayout(addBtnL);
-
-    connect(addBtn, &QPushButton::clicked,
-            this, [=]{this->MainWindow::show_publication_window(-1);});
+    if (can_edit){
+        addBtn = new QPushButton();
+        addBtn->setText("+");
+        QHBoxLayout* addBtnL = new QHBoxLayout();
+        addBtn->setFixedSize(30, 30);
+        addBtn->setStyleSheet("background-color: #5eba7d; color: white; font-size: 25px;");
+        QSpacerItem* addBtnSpacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
+        addBtnL->addSpacerItem(addBtnSpacer);
+        addBtnL->addWidget(addBtn);
+        centralL->addLayout(addBtnL);
+        connect(addBtn, &QPushButton::clicked,
+                this, [=]{this->MainWindow::show_publication_window(-1);});
+    }
 
     show();
     update_tab_table(0);
@@ -95,12 +95,12 @@ void MainWindow::update_tab_table(int index){
     for (int i = 0; i < 4; ++i) delete m[i];
 }
 
-void MainWindow::show_publication_window(int id){
-    PublicationViewWindow *newPublicationWindow = new PublicationViewWindow(db, this, id, true);
-    disable();
-    connect(newPublicationWindow, &PublicationViewWindow::window_closed,
-            this, [=](){this->delete_child_window(newPublicationWindow); this->enable();});
-}
+    void MainWindow::show_publication_window(int id){
+        PublicationViewWindow *newPublicationWindow = new PublicationViewWindow(db, this, id);
+        disable();
+        connect(newPublicationWindow, &PublicationViewWindow::window_closed,
+                this, [=](){this->delete_child_window(newPublicationWindow); this->enable();});
+    }
 
 void MainWindow::delete_child_window(QMainWindow* ptr){
     delete ptr;

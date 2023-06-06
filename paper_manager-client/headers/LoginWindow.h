@@ -12,7 +12,7 @@ class LoginWindow : public BaseWindow
     Q_OBJECT
 
 public:
-    LoginWindow(PSQLInterface *psqli, QWidget *parent);
+    LoginWindow(PSQLInterface *psqli);
 
 signals:
     void login_successful();

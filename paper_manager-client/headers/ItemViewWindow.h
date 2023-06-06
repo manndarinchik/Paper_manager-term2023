@@ -31,11 +31,10 @@ class ItemViewWindow : public BaseWindow
     Q_OBJECT
 protected:
     int itemID;
-    bool canEdit;
     QSqlQueryModel* model;
 
 public:
-    ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1, bool canEdit=false);
+    ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
     ~ItemViewWindow(){};
     static QString insert_array_into_query(QString base_query, std::vector<unsigned int>* list, QString filter_tail);
     static QString format_date(QDate d);
@@ -63,7 +62,7 @@ private:
     std::vector<unsigned int> newCompilations;
 
 public:
-    PublicationViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1, bool canEdit=false);
+    PublicationViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
     ~PublicationViewWindow(){};
     void submit();
 private:

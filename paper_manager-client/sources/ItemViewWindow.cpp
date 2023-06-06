@@ -37,7 +37,7 @@ void ListTableView::update_display(){
 void ListTableView::show_context_menu(QPoint pos){
     QModelIndex cell = indexAt(pos).siblingAtColumn(0);
     qDebug() << cell.data().toUInt();
-    QMenu *menu = new QMenu(this);
+    QMenu *menu = new QMenu(this);  
     menu->addAction("Удалить", this, [=](){
         for (int i = 0; i < list->size(); ++i)
             if (list->at(i) == cell.data().toUInt()){
@@ -56,12 +56,11 @@ QString ListTableView::exclusion_query(){
     return query;
 }
 
-ItemViewWindow::ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID, bool canEdit)
+ItemViewWindow::ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID)
     : BaseWindow(psqli, "Новая запись", parent){
     if (itemID != -1)
         this->setWindowTitle("Редактировать запись");
     this->itemID = itemID;
-    this->canEdit = canEdit;
     model = nullptr;
 }
 QString ItemViewWindow::insert_array_into_query(QString base_query, std::vector<unsigned int>* list, QString filter_tail){
@@ -78,7 +77,7 @@ void ItemViewWindow::add_table_item(ListTableView* table){
     QuerySelectionWindow* item_selection = new QuerySelectionWindow(db, this, table->exclusion_query());
     connect(item_selection, &QuerySelectionWindow::selection_confirmed, this, [=](QModelIndex s){
         table->list->push_back(s.data().toUInt());
-        table->update_display();
+        table->update_display();        
         item_selection->close();
     });
 }
@@ -98,8 +97,8 @@ void ItemViewWindow::remove_item(){
     close();
 }
 
-PublicationViewWindow::PublicationViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID, bool canEdit)
-    : ItemViewWindow(psqli, parent, itemID, canEdit){
+PublicationViewWindow::PublicationViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID)
+    : ItemViewWindow(psqli, parent, itemID){
     if (itemID != -1)
         this->setWindowTitle("Редактировать публикацию");
     newAuthors = {};
@@ -137,7 +136,7 @@ PublicationViewWindow::PublicationViewWindow(PSQLInterface* psqli, QWidget *pare
     if (itemID != -1)
         populate_with_db_data();
     
-    if (canEdit){
+    if (can_edit){
         QHBoxLayout *btnL = new QHBoxLayout();
         centralL->addLayout(btnL);
         centralL->setAlignment(btnL, Qt::AlignCenter);

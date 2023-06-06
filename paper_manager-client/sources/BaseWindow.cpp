@@ -1,7 +1,8 @@
-#include "BaseWindow.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSpacerItem>
+#include <QDebug>
+#include "BaseWindow.h"
 
 BaseWindow::BaseWindow(PSQLInterface *psqli, const char *ch, QWidget *parent)
     : QMainWindow()
@@ -20,13 +21,22 @@ BaseWindow::BaseWindow(PSQLInterface *psqli, const char *ch, QWidget *parent)
     QObject::connect(errorWindow, &ErrorWindow::message_closed,
                     this, &BaseWindow::enable);
 
+    if (db->isOpen()){
+        QSqlQueryModel* is_editor = query_database(QString("SELECT * FROM can_edit('%1')").arg(db->get_login()));
+        can_edit = is_editor->data(is_editor->index(0, 0)).toBool();
+        delete is_editor;
+    } else
+        can_edit = false;
+
+    //qDebug() << "Editor window: "<<can_edit;
+ 
 }
-BaseWindow::~BaseWindow(){}
 
 QSqlQueryModel* BaseWindow::query_database(QString query)
 {
     QSqlQueryModel* model = db->issue_query(query);
     QSqlError error = model->lastError();
+    //qDebug() << "Query status: " << (!error.isValid() ? "OK" : error.databaseText());
     switch (error.type())
     {
     case QSqlError::NoError:
@@ -37,10 +47,8 @@ QSqlQueryModel* BaseWindow::query_database(QString query)
         show_error("Неверный запрос к базе данных, обратитесь к администратору."); break;
     case QSqlError::TransactionError:
         show_error("Ошибка транзакции, обратитесь к администратору."); break;
-    case QSqlError::UnknownError:
-        show_error("Неизвестная ошибка, обратитесь к администратору."); break;
     default:
-        break;
+        show_error("Неизвестная ошибка, обратитесь к администратору."); break;
     }
     delete model;
     return nullptr;

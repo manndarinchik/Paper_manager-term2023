@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QLayout>
-#include <PSQLinterface.h>
+#include "PSQLinterface.h"
 #include <QPushButton>
 #include <QCloseEvent>
 #include "ErrorWindow.h"
@@ -14,13 +14,14 @@ class BaseWindow : public QMainWindow
 
 public:
     BaseWindow(PSQLInterface *psqli, const char *ch = nullptr, QWidget *parent = nullptr);
-    ~BaseWindow();
+    ~BaseWindow(){}
 
 protected:
     PSQLInterface *db;
     QWidget *centralW;
     QVBoxLayout *centralL;
     ErrorWindow *errorWindow;
+    bool can_edit;
 
     QSqlQueryModel* query_database(QString query); 
     void closeEvent(QCloseEvent *event){emit window_closed(); event->accept();}

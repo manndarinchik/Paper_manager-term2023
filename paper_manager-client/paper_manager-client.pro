@@ -3,14 +3,27 @@
 ######################################################################
 
 TEMPLATE = app
-INCLUDEPATH += .
+INCLUDEPATH +=  . \ 
+                headers
 
 QT += core gui widgets sql
-
-SOURCES_DIR += ./sources
-
-HEADERS_DIR += ./headers
+HEADERS +=  headers/BaseWindow.h \
+            headers/ErrorWindow.h \
+            headers/ItemViewWindow.h \
+            headers/LoginWindow.h \
+            headers/MainWindow.h \
+            headers/MainWorker.h \
+            headers/PSQLinterface.h \
+            headers/QuerySelectionWindow.h
+SOURCES += main.cpp \
+            sources/BaseWindow.cpp \
+            sources/Errorwindow.cpp \
+            sources/ItemViewWindow.cpp \
+            sources/LoginWindow.cpp \
+            sources/MainWindow.cpp \
+            sources/PSQLinterface.cpp \
+            sources/QuerySelectionWindow.cpp
 
 # Directories
 
-set(CMAKE_AUTOMOC ON)
+#set(CMAKE_AUTOMOC ON)

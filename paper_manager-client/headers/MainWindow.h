@@ -26,11 +26,6 @@ private:
 
     QTableView* create_table(QWidget* parent); 
 
-signals:
-
-public slots:
-    void init();
-
 private slots:
     void update_tab_table(int index);
     void show_publication_window(int id = -1);
