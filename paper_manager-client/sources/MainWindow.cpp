@@ -124,9 +124,9 @@ void MainWindow::create_itemview(int id){
 
 void MainWindow::bind_itemview_window(ItemViewWindow* window){
     disable();
+    subwindows.push_back(window);
     connect(window, &PublicationViewWindow::window_closed, this, [=](){
         this->enable();
         this->update_tab_table(this->tabsWidget->currentIndex());
-        delete window;
     });
 }

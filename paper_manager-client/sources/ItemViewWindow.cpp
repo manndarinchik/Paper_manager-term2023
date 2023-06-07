@@ -82,6 +82,7 @@ QString ItemViewWindow::format_date(QDate d){
 }
 void ItemViewWindow::add_table_item(ListTableView* table){
     QuerySelectionWindow* item_selection = new QuerySelectionWindow(db, this, table->exclusion_query());
+    subwindows.push_back(item_selection);
     disable();
     connect(item_selection, &QuerySelectionWindow::selection_confirmed, this, [=](QModelIndex s){
         table->list->push_back(s.data().toUInt());
@@ -89,7 +90,6 @@ void ItemViewWindow::add_table_item(ListTableView* table){
         item_selection->close();
     });
     connect(item_selection, &QuerySelectionWindow::window_closed, this, [=](){
-        delete item_selection;
         enable();
     });
 }
@@ -98,6 +98,7 @@ void ItemViewWindow::select_from_query(QPushButton* display, int* id, QString ba
     if (*id != -1)
         query += QString(" WHERE %1 != %2").arg(filter_field, QString::number(*id));
     QuerySelectionWindow* item_selection = new QuerySelectionWindow(db, this, query);
+    subwindows.push_back(item_selection);
     disable();
     connect(item_selection, &QuerySelectionWindow::selection_confirmed, this, [=](QModelIndex s){
         *id = s.siblingAtColumn(0).data().toInt();
@@ -105,7 +106,6 @@ void ItemViewWindow::select_from_query(QPushButton* display, int* id, QString ba
         item_selection->close();
     });
     connect(item_selection, &QuerySelectionWindow::window_closed, this, [=](){
-        delete item_selection;
         enable();
     });
 }

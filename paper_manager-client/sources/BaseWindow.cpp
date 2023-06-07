@@ -29,8 +29,8 @@ BaseWindow::BaseWindow(PSQLInterface *psqli, const char *ch, QWidget *parent)
         can_edit = false;
 
     //qDebug() << "Editor window: "<<can_edit;
- 
 }
+
 
 QSqlQueryModel* BaseWindow::query_database(QString query)
 {
@@ -52,4 +52,14 @@ QSqlQueryModel* BaseWindow::query_database(QString query)
     }
     delete model;
     return nullptr;
+}
+
+void BaseWindow::closeEvent(QCloseEvent *event){
+    qDebug() << "Closing window";
+    for (int i = 0; i < subwindows.size(); ++i){
+        if (subwindows.at(i) != nullptr)
+            subwindows.at(i)->close();
+    }
+    event->accept();
+    emit window_closed(); 
 }

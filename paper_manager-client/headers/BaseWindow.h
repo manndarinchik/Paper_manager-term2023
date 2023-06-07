@@ -14,7 +14,7 @@ class BaseWindow : public QMainWindow
 
 public:
     BaseWindow(PSQLInterface *psqli, const char *ch = nullptr, QWidget *parent = nullptr);
-    ~BaseWindow(){}
+    ~BaseWindow(){};
 
 protected:
     PSQLInterface *db;
@@ -22,9 +22,10 @@ protected:
     QVBoxLayout *centralL;
     ErrorWindow *errorWindow;
     bool can_edit;
+    std::vector<BaseWindow*> subwindows;
 
     QSqlQueryModel* query_database(QString query); 
-    void closeEvent(QCloseEvent *event){emit window_closed(); event->accept();}
+    void closeEvent(QCloseEvent *event);
 
 signals:
     void show_error(QString message);
