@@ -387,7 +387,7 @@ PublisherViewWindow::PublisherViewWindow(PSQLInterface* psqli, QWidget *parent, 
     form->addRow("Страна", newCountry);
     form->addRow("Город", newCity);
     form->addRow("Адресс", newAddress);
-    form->addRow("Телефонный номер", newEmail);
+    form->addRow("Телефонный номер", newNum);
     form->addRow("Эл. почта", newEmail);
 
     if (itemID != -1)
@@ -410,11 +410,11 @@ void PublisherViewWindow::populate_with_db_data(){
     QSqlQueryModel* model = query_database(QString("SELECT * FROM PUBLISHER WHERE publisherID=%1").arg(itemID));
     
     newName->setText(model->data(model->index(0, 1)).toString());
-    newCountry->setText(model->data(model->index(0, 2)).toString());
-    newCity->setText(model->data(model->index(0, 3)).toString());
-    newAddress->setText(model->data(model->index(0, 4)).toString());
-    newNum->setText(model->data(model->index(0, 5)).toString());
-    newEmail->setText(model->data(model->index(0, 6)).toString());
+    newCountry->setText(model->data(model->index(0, 3)).toString());
+    newCity->setText(model->data(model->index(0, 4)).toString());
+    newAddress->setText(model->data(model->index(0, 5)).toString());
+    newNum->setText(model->data(model->index(0, 6)).toString());
+    newEmail->setText(model->data(model->index(0, 7)).toString());
     
     delete model;
 }
