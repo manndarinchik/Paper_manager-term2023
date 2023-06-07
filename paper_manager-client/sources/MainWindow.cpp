@@ -27,8 +27,27 @@ MainWindow::MainWindow(PSQLInterface *psqli)
     cn_table = create_table(cn_tab);
     tabsWidget->addTab(cn_tab, QString("Сборники"));
 
-    connect(tabsWidget, &QTabWidget::currentChanged,
-            this, &MainWindow::update_tab_table);
+    connect(tabsWidget, &QTabWidget::currentChanged, this, [=](int index){
+    switch (index)
+        {
+        case 0:
+            update_table(pn_table, "SELECT * FROM PUBLICATION_COMPOSITE", 
+            {"Название", "Тип", "Дата", "Авторы", "Издательство"});
+            break;
+        case 1:
+            update_table(ar_table, "SELECT * FROM AUTHOR_COMPOSITE", 
+            {"ФИО", "Науч. степень", "Статьи", "Препринты", "Монографии", "Диссертации", "Патенты", "Отчеты"});
+            break;
+        case 2:
+            update_table(pr_table, "SELECT * FROM PUBLISHER", 
+            {"Название", "Аббревиатура", "Страна", "Город", "Адрес", "Контактный номер", "Эл. почта"});
+            break;
+        case 3:
+            update_table(cn_table, "SELECT * FROM COMPILATION_COMPOSITE", 
+            {"Название", "Дата", "Издательство", "Публикации"});
+            break;
+        }
+    });
 
     centralL->addWidget(tabsWidget);  
 
@@ -46,8 +65,9 @@ MainWindow::MainWindow(PSQLInterface *psqli)
                 this, [=](){create_itemview(-1);});
     }
 
+    tabsWidget->setCurrentIndex(1);
     show();
-    update_tab_table(0);
+    tabsWidget->setCurrentIndex(0);
 }
 
 QTableView* MainWindow::create_table(QWidget* parent){
@@ -64,38 +84,15 @@ QTableView* MainWindow::create_table(QWidget* parent){
     return table;
 }
 
-void MainWindow::update_tab_table(int index){
-    QItemSelectionModel* m[4] = {
-        pn_table->selectionModel(),
-        ar_table->selectionModel(),
-        pr_table->selectionModel(),
-        cn_table->selectionModel()
-    };
-    QSqlQueryModel* model = nullptr;
-    switch (index)
-    {
-    case 0:
-        model = query_database("SELECT * FROM PUBLICATION_COMPOSITE");
-        if (model != nullptr) pn_table->setModel(model);
-        break;
-    case 1:
-        model = query_database("SELECT * FROM AUTHOR_COMPOSITE");
-        if (model != nullptr) ar_table->setModel(model);
-        break;
-    case 2:
-        model = query_database("SELECT * FROM PUBLISHER");
-        if (model != nullptr) pr_table->setModel(model);
-        break;
-    case 3:
-        model = query_database("SELECT * FROM COMPILATION_COMPOSITE");
-        if (model != nullptr) cn_table->setModel(model);
-        break;
+void MainWindow::update_table(QTableView* table, QString query, QStringList labels){
+    delete table->model();
+    table->setModel(query_database(query));
+    table->setColumnHidden(0, true);
+    for (int i = 0; i < labels.size(); ++i){
+        qDebug() << table->horizontalHeader();
+        table->model()->setHeaderData(i+1, Qt::Horizontal, labels.at(i));
     }
-
-    for (int i = 0; i < 4; ++i) delete m[i];
 }
-
-
 
 void MainWindow::itemview_requested(QTableView* table){
     int id = table->selectionModel()->selectedRows(0)[0].data().toInt();
@@ -127,6 +124,6 @@ void MainWindow::bind_itemview_window(ItemViewWindow* window){
     subwindows.push_back(window);
     connect(window, &PublicationViewWindow::window_closed, this, [=](){
         this->enable();
-        this->update_tab_table(this->tabsWidget->currentIndex());
+        tabsWidget->setCurrentIndex(this->tabsWidget->currentIndex());
     });
 }

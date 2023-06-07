@@ -30,8 +30,7 @@ private:
     void itemview_requested(QTableView* table);
     void create_itemview(int id = -1);
     void bind_itemview_window(ItemViewWindow* window);
+    void update_table(QTableView* table, QString query, QStringList labels);
 
-private slots:
-    void update_tab_table(int index);
 };
 #endif // MAINWINDOW_H
