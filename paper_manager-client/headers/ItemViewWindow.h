@@ -16,9 +16,10 @@ private:
     QString base_query, filter_field;
     PSQLInterface* db;
     QMenu *menu;
+    std::vector<int> hidden_colums;
 public:
     std::vector<unsigned int>* list;
-    ListTableView(PSQLInterface *psqli, QWidget *parent, QString base_query, QString filder_field, std::vector<unsigned int>* list);
+    ListTableView(PSQLInterface *psqli, QWidget *parent, QString base_query, QString filder_field, std::vector<unsigned int>* list, std::vector<int> hidden_colums = {0});
     void update_display();
     QString exclusion_query();
 
@@ -115,22 +116,25 @@ protected slots:
 };
 
 
-// class CompilationViewWindow : public ItemViewWindow
-// {
-//     Q_OBJECT
-// private:
-//     QLineEdit *newName;
-//     QDate *newDate;
-//     int *newPublisher;
-//     ListTableView *newPublications;
+class CompilationViewWindow : public ItemViewWindow
+{
+    Q_OBJECT
+private:
+    QLineEdit *newName;
+    QDateEdit *newDate;
+    int newPublisher;
+    QPushButton* newPublisherDisplay;
+    ListTableView *newPublicationsView;
+    std::vector<unsigned int> newPublications;
 
-// public:
-//     CompilationViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
-//     ~CompilationViewWindow(){}
-// private:
-//     void populate_with_db_data() override;
-// protected slots:
-//     void submit() override;
-// };
+public:
+    CompilationViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
+    ~CompilationViewWindow(){}
+private:
+    void populate_with_db_data() override;
+protected slots:
+    void submit() override;
+    void remove_item() override;
+};
 
 #endif //ITEMVIEWWINDOW_H

@@ -15,7 +15,7 @@ private:
     QPushButton* create_value;
     QSqlQueryModel* model;
 public:
-    QuerySelectionWindow(PSQLInterface* psqli, QWidget *parent, QString query);
+    QuerySelectionWindow(PSQLInterface* psqli, QWidget *parent, QString query, std::vector<int> hidden_colums = {0});
 private slots:
     void confirm_selection();
 

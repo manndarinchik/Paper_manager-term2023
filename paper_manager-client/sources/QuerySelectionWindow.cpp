@@ -2,7 +2,7 @@
 #include <QHeaderView>
 #include <QAbstractItemView>
 
-QuerySelectionWindow::QuerySelectionWindow(PSQLInterface* psqli, QWidget *parent, QString query)
+QuerySelectionWindow::QuerySelectionWindow(PSQLInterface* psqli, QWidget *parent, QString query, std::vector<int> hidden_colums)
     : BaseWindow(psqli, "Выбор значения", parent){
     this->setFixedSize(400, 500);
     //qDebug() << query;
@@ -19,7 +19,8 @@ QuerySelectionWindow::QuerySelectionWindow(PSQLInterface* psqli, QWidget *parent
     table->setModel(model);
     table->verticalHeader()->hide();
     table->horizontalHeader()->hide();
-    table->setColumnHidden(0, true);
+    for (int i = 0; i < hidden_colums.size(); ++i)
+        table->setColumnHidden(hidden_colums.at(i), true);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
 
