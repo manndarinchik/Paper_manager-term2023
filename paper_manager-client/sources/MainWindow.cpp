@@ -14,8 +14,6 @@ MainWindow::MainWindow(PSQLInterface *psqli)
     pn_tab = new QWidget();
     pn_table = create_table(pn_tab);
     tabsWidget->addTab(pn_tab, QString("Публикации"));
-    connect(pn_table, &QTableView::doubleClicked,
-            this, &MainWindow::edit_publication);
 
     ar_tab = new QWidget;
     ar_table = create_table(ar_tab);
@@ -45,7 +43,7 @@ MainWindow::MainWindow(PSQLInterface *psqli)
         addBtnL->addWidget(addBtn);
         centralL->addLayout(addBtnL);
         connect(addBtn, &QPushButton::clicked,
-                this, [=]{this->MainWindow::show_publication_window(-1);});
+                this, [=](){create_itemview(-1);});
     }
 
     show();
@@ -61,6 +59,8 @@ QTableView* MainWindow::create_table(QWidget* parent){
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    connect(table, &QTableView::doubleClicked,
+            this, [=](){itemview_requested(table);});
     return table;
 }
 
@@ -95,22 +95,38 @@ void MainWindow::update_tab_table(int index){
     for (int i = 0; i < 4; ++i) delete m[i];
 }
 
-void MainWindow::show_publication_window(int id){
-    PublicationViewWindow *newPublicationWindow = new PublicationViewWindow(db, this, id);
+
+
+void MainWindow::itemview_requested(QTableView* table){
+    int id = table->selectionModel()->selectedRows(0)[0].data().toInt();
+    create_itemview(id);
+}
+
+void MainWindow::create_itemview(int id){
+    switch (this->tabsWidget->currentIndex())
+    {
+    case 0:
+        bind_itemview_window(new PublicationViewWindow(db, this, id));
+        break;
+    case 1:
+        bind_itemview_window(new AuthorViewWindow(db, this, id));
+        break;
+    // case 2:
+    //     show_itemview_window(pn_table, new PublisherViewWindow(db, this));
+    //     break;
+    // case 3:
+    //     show_itemview_window(pn_table, new CompilationViewWindow(db, this));
+    //     break;
+    default:
+        break;
+    }
+}
+
+void MainWindow::bind_itemview_window(ItemViewWindow* window){
     disable();
-    connect(newPublicationWindow, &PublicationViewWindow::window_closed, this, [=](){
-        this->delete_child_window(newPublicationWindow);
+    connect(window, &PublicationViewWindow::window_closed, this, [=](){
         this->enable();
         this->update_tab_table(this->tabsWidget->currentIndex());
+        delete window;
     });
 }
-
-void MainWindow::delete_child_window(QMainWindow* ptr){
-    delete ptr;
-}
-
-void MainWindow::edit_publication(const QModelIndex &index){
-    QModelIndex selected_row = pn_table->selectionModel()->selectedRows(0)[0];
-    show_publication_window(selected_row.data().toInt());
-}
-

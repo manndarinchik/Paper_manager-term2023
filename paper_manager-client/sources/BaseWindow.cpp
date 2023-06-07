@@ -36,7 +36,7 @@ QSqlQueryModel* BaseWindow::query_database(QString query)
 {
     QSqlQueryModel* model = db->issue_query(query);
     QSqlError error = model->lastError();
-    //qDebug() << "Query status: " << (!error.isValid() ? "OK" : error.databaseText());
+    qDebug() << "Query '" << model->query().lastQuery() << "': " << (!error.isValid() ? "OK" : error.databaseText());
     switch (error.type())
     {
     case QSqlError::NoError:

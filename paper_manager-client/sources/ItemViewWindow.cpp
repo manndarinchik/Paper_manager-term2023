@@ -10,6 +10,9 @@
 #include <QAbstractItemView>
 #include <QGuiApplication>
 
+// ---------------------
+// -- LIST TABLE VIEW --
+// ---------------------
 ListTableView::ListTableView(PSQLInterface *psqli, QWidget *parent, QString base_query, QString filter_field, std::vector<unsigned int>* list)
     :QTableView(parent){
     this->base_query = base_query;
@@ -35,6 +38,7 @@ void ListTableView::update_display(){
     setColumnHidden(0, true);
 }
 void ListTableView::show_context_menu(QPoint pos){
+    qDebug() << "Item deletion requested at: ";
     QModelIndex cell = indexAt(pos).siblingAtColumn(0);
     qDebug() << cell.data().toUInt();
     QMenu *menu = new QMenu(this);  
@@ -55,7 +59,9 @@ QString ListTableView::exclusion_query(){
     qDebug() << query;
     return query;
 }
-
+// --------------------------
+// -- ITEM VIEW BASE CLASS --
+// --------------------------
 ItemViewWindow::ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID)
     : BaseWindow(psqli, "Новая запись", parent){
     if (itemID != -1)
@@ -63,7 +69,6 @@ ItemViewWindow::ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID
     if (can_edit != -1)
         this->setWindowTitle("Просмотр записи");
     this->itemID = itemID;
-    model = nullptr;
 }
 QString ItemViewWindow::insert_array_into_query(QString base_query, std::vector<unsigned int>* list, QString filter_tail){
     QString query = base_query;
@@ -77,10 +82,15 @@ QString ItemViewWindow::format_date(QDate d){
 }
 void ItemViewWindow::add_table_item(ListTableView* table){
     QuerySelectionWindow* item_selection = new QuerySelectionWindow(db, this, table->exclusion_query());
+    disable();
     connect(item_selection, &QuerySelectionWindow::selection_confirmed, this, [=](QModelIndex s){
         table->list->push_back(s.data().toUInt());
         table->update_display();        
         item_selection->close();
+    });
+    connect(item_selection, &QuerySelectionWindow::window_closed, this, [=](){
+        delete item_selection;
+        enable();
     });
 }
 void ItemViewWindow::select_from_query(QPushButton* display, int* id, QString base_query, QString filter_field){
@@ -88,15 +98,16 @@ void ItemViewWindow::select_from_query(QPushButton* display, int* id, QString ba
     if (*id != -1)
         query += QString(" WHERE %1 != %2").arg(filter_field, QString::number(*id));
     QuerySelectionWindow* item_selection = new QuerySelectionWindow(db, this, query);
+    disable();
     connect(item_selection, &QuerySelectionWindow::selection_confirmed, this, [=](QModelIndex s){
         *id = s.siblingAtColumn(0).data().toInt();
         display->setText(s.siblingAtColumn(1).data().toString());
         item_selection->close();
     });
-}
-void ItemViewWindow::remove_item(){
-    query_database(QString("SELECT remove_publication(%1)").arg(itemID));
-    close();
+    connect(item_selection, &QuerySelectionWindow::window_closed, this, [=](){
+        delete item_selection;
+        enable();
+    });
 }
 QHBoxLayout* ItemViewWindow::create_edit_buttons(){
         QHBoxLayout *btnL = new QHBoxLayout();
@@ -123,7 +134,7 @@ QHBoxLayout* ItemViewWindow::create_edit_buttons(){
             btnL->addWidget(deleteBtn); 
             btnL->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
             connect(deleteBtn, &QPushButton::clicked, 
-                this, &PublicationViewWindow::remove_item);
+                this, &ItemViewWindow::remove_item);
         }
         btnL->addWidget(finishBtn); 
         btnL->addWidget(abortBtn);
@@ -131,6 +142,9 @@ QHBoxLayout* ItemViewWindow::create_edit_buttons(){
         return btnL;
 }
 
+// ----------------------
+// -- PUBLICATION VIEW --
+// ----------------------
 PublicationViewWindow::PublicationViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID)
     : ItemViewWindow(psqli, parent, itemID){
     newAuthors = {};
@@ -199,7 +213,7 @@ PublicationViewWindow::PublicationViewWindow(PSQLInterface* psqli, QWidget *pare
     show();
 }
 void PublicationViewWindow::populate_with_db_data(){
-    model = query_database(QString("SELECT publicationID, name, type, publicationdate, publisherID FROM PUBLICATION where publicationID=%1").arg(itemID));
+    QSqlQueryModel* model = query_database(QString("SELECT publicationID, name, type, publicationdate, publisherID FROM PUBLICATION where publicationID=%1").arg(itemID));
     
     newName->setText(model->data(model->index(0, 1)).toString());
     newType->setCurrentIndex(model->data(model->index(0, 2)).toInt());
@@ -216,7 +230,7 @@ void PublicationViewWindow::populate_with_db_data(){
         newAuthors.push_back(authors->data(authors->index(i, 0)).toUInt());
     for (int i = 0; i < compilations->rowCount(); ++i)
         newCompilations.push_back(compilations->data(compilations->index(i, 0)).toUInt());
-    delete authors; delete compilations; 
+    delete authors; delete compilations; delete model;
     newAuthorsDisplay->update_display();
     newCompilationsDisplay->update_display();
 }
@@ -239,26 +253,117 @@ void PublicationViewWindow::submit(){
     }
 
     QString query; 
+    QSqlQueryModel* model;
     if (itemID == -1){
         query = QString("SELECT * FROM add_publication('%1', %2, %3, %4); ").arg(
             newName->text(), QString::number(newType->currentIndex()), QString::number(newPublisher), format_date(newDate->date())
         );
-        QSqlQueryModel* pID = query_database(query);
-        itemID = pID->data(pID->index(0,0)).toInt();
-        delete pID;
+        model = query_database(query);
+        itemID = model->data(model->index(0,0)).toInt();
     } else 
         query = QString("SELECT edit_publication(%1, '%2', %3, %4, %5); ").arg(
             QString::number(itemID), newName->text(), QString::number(newType->currentIndex()), QString::number(newPublisher), format_date(newDate->date())
         );
-    query += insert_array_into_query(
+        model = query_database(query);
+    query = insert_array_into_query(
         QString("CALL set_publication_authors(%1, ARRAY[").arg(itemID), &newAuthors, "]::integer[]); " 
     )
     //  + insert_array_into_query(
     //     QString("CALL set_publication_compilations(%1, ARRAY[").arg(itemID), &newCompilations, "]::integer[]);" 
     // )
     ;
-    qDebug() << query;
-    db->issue_query(query);
+    model = query_database(query);
+    delete model;
+    close();
+}
+void PublicationViewWindow::remove_item(){
+    query_database(QString("SELECT remove_publication(%1)").arg(itemID));
     close();
 }
 
+
+// -----------------
+// -- AUTHOR VIEW --
+// -----------------
+AuthorViewWindow::AuthorViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID): ItemViewWindow(psqli, parent, itemID){
+    newName = new QLineEdit();
+    newDegree = new QLineEdit();
+    newPublications = {};
+    
+    QFormLayout *form = new QFormLayout();
+    form->addRow("Название:", newName);
+    form->addRow("Ученая степень:", newDegree);
+    centralL->addLayout(form);
+
+    newPublicationsView = new ListTableView(psqli, this, "SELECT publicationID, name, publicationtype, date, publisher FROM PUBLICATION_COMPOSITE", "publicationID", &newPublications);
+    
+    if (itemID != -1)
+        populate_with_db_data();
+
+    if (can_edit){
+        newPublicationsView->setContextMenuPolicy(Qt::CustomContextMenu);
+        QPushButton* addPublication = new QPushButton("Добавить", this);
+        connect(addPublication, &QPushButton::clicked,
+                this, [=](){this->add_table_item(newPublicationsView);});
+        form->addRow("Публикации автора", addPublication);
+    } else {
+        centralL->addWidget(new QLabel("Публикации автора"));
+        newName->setReadOnly(true);
+        newDegree->setReadOnly(true);
+    }
+
+    centralL->addWidget(newPublicationsView);
+
+    if (can_edit)
+        centralL->addLayout(create_edit_buttons());
+    show();
+}
+
+void AuthorViewWindow::populate_with_db_data(){
+    QSqlQueryModel* model = query_database(QString("SELECT * FROM AUTHOR WHERE authorID=%1;").arg(itemID));
+    
+    newName->setText(model->data(model->index(0, 1)).toString());
+    newDegree->setText(model->data(model->index(0, 2)).toString());
+    QSqlQueryModel* publications = query_database(QString("SELECT publicationID, name, publicationtype, date, publisher FROM get_authors_publications(%1)").arg(itemID));
+    for (int i = 0; i < publications->rowCount(); ++i)
+        newPublications.push_back(publications->data(publications->index(i, 0)).toUInt());
+    
+    delete publications; delete model;
+
+    newPublicationsView->update_display();
+}
+
+void AuthorViewWindow::submit(){
+    QString error_msg = "";
+    if (newName->text().isEmpty())
+        error_msg.append("Не указано имя автора.\n");
+    if (newName->text().isEmpty())
+        error_msg.append("Не указано ученая степень автора.\n");
+    
+    if (!error_msg.isEmpty()){
+        show_error(error_msg);
+        return;
+    }
+
+    if (itemID == -1){
+        QSqlQueryModel* model = query_database(
+            QString("SELECT * FROM add_author('%1', '%2'); ").arg(
+                newName->text(), newDegree->text()
+        ));
+        itemID = model->data(model->index(0,0)).toInt();
+        delete model;
+    } else 
+        delete query_database(
+            QString("SELECT edit_author(%1, '%2', '%3'); ").arg(
+                QString::number(itemID), newName->text(), newDegree->text()
+        ));
+    delete query_database(insert_array_into_query(
+        QString("CALL set_authors_publications(%1, ARRAY[").arg(itemID), &newPublications, "]::integer[]); " 
+    ));
+    close();
+}
+
+void AuthorViewWindow::remove_item(){
+    query_database(QString("SELECT remove_author(%1)").arg(itemID));
+    close();
+}

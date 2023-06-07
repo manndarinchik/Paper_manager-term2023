@@ -5,6 +5,7 @@
 #include <QTableWidget>
 #include "BaseWindow.h"
 #include "PSQLinterface.h"
+#include "ItemViewWindow.h"
 
 class MainWindow : public BaseWindow
 {
@@ -26,11 +27,11 @@ private:
     QPushButton *addBtn;
 
     QTableView* create_table(QWidget* parent); 
+    void itemview_requested(QTableView* table);
+    void create_itemview(int id = -1);
+    void bind_itemview_window(ItemViewWindow* window);
 
 private slots:
     void update_tab_table(int index);
-    void show_publication_window(int id = -1);
-    void edit_publication(const QModelIndex &index);
-    void delete_child_window(QMainWindow* ptr);
 };
 #endif // MAINWINDOW_H

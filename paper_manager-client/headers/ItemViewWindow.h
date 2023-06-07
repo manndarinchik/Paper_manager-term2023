@@ -31,7 +31,6 @@ class ItemViewWindow : public BaseWindow
     Q_OBJECT
 protected:
     int itemID;
-    QSqlQueryModel* model;
 
 public:
     ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
@@ -49,7 +48,7 @@ signals:
 
 protected slots:
     virtual void submit(){};
-    void remove_item();
+    virtual void remove_item(){};
 };
 
 class PublicationViewWindow : public ItemViewWindow
@@ -73,6 +72,64 @@ private:
     void populate_with_db_data() override;
 protected slots:
     void submit() override;
+    void remove_item() override;
 };
+
+class AuthorViewWindow : public ItemViewWindow
+{
+    Q_OBJECT
+private:
+    QLineEdit *newName;
+    QLineEdit *newDegree;
+    ListTableView *newPublicationsView;
+    std::vector<unsigned int> newPublications;
+
+public:
+    AuthorViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
+    ~AuthorViewWindow(){}
+private:
+    void populate_with_db_data() override;
+protected slots:
+    void submit() override;
+    void remove_item() override;
+};
+
+// class PublisherViewWindow : public ItemViewWindow
+// {
+//     Q_OBJECT
+// private:
+//     QLineEdit *newName;
+//     QLineEdit *newCountry;
+//     QLineEdit *newCity;
+//     QLineEdit *newAddress;
+//     QLineEdit *newNum;
+//     QLineEdit *newEmail;
+// public:
+//     PublisherViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
+//     ~PublisherViewWindow(){}
+// private:
+//     void populate_with_db_data() override;
+// protected slots:
+//     void submit() override;
+// };
+
+
+// class CompilationViewWindow : public ItemViewWindow
+// {
+//     Q_OBJECT
+// private:
+//     QLineEdit *newName;
+//     QDate *newDate;
+//     int *newPublisher;
+//     ListTableView *newPublications;
+
+// public:
+//     CompilationViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
+//     ~CompilationViewWindow(){}
+// private:
+//     void populate_with_db_data() override;
+// protected slots:
+//     void submit() override;
+// };
 
 #endif //ITEMVIEWWINDOW_H

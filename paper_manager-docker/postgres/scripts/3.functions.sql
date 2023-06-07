@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION remove_author(
 ) RETURNS void AS
 $$
 BEGIN
-	DELETE FROM AUTHOR_STATS WHERE authorID = removeID;
+	DELETE FROM AUTHOR WHERE authorID = removeID;
 END;
 $$ LANGUAGE  plpgsql;
 
