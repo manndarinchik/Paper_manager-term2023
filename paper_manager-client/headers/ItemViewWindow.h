@@ -38,10 +38,15 @@ public:
     ~ItemViewWindow(){};
     static QString insert_array_into_query(QString base_query, std::vector<unsigned int>* list, QString filter_tail);
     static QString format_date(QDate d);
+
 protected:
     virtual void populate_with_db_data(){};
     void add_table_item(ListTableView* table);
     void select_from_query(QPushButton* display, int* id, QString base_query, QString filter_field);
+    QHBoxLayout* create_edit_buttons();
+signals:
+    void edited_id(int id);
+
 protected slots:
     virtual void submit(){};
     void remove_item();
@@ -64,9 +69,10 @@ private:
 public:
     PublicationViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
     ~PublicationViewWindow(){};
-    void submit();
 private:
-    void populate_with_db_data();
+    void populate_with_db_data() override;
+protected slots:
+    void submit() override;
 };
 
 #endif //ITEMVIEWWINDOW_H

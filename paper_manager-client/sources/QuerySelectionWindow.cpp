@@ -23,8 +23,11 @@ QuerySelectionWindow::QuerySelectionWindow(PSQLInterface* psqli, QWidget *parent
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
 
+    connect(table, &QTableView::doubleClicked,
+            this, &QuerySelectionWindow::confirm_selection);
     connect(confirm, &QPushButton::clicked,
             this, &QuerySelectionWindow::confirm_selection);
+            
     connect(create_value, &QPushButton::clicked,
             this, [=](){emit value_create_request();});
 

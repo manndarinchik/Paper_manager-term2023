@@ -9,14 +9,13 @@ MainWindow::MainWindow(PSQLInterface *psqli)
     : BaseWindow(psqli, "Публикации"){
     this->resize(800, 500);
 
-    QTabWidget *tabsWidget = new QTabWidget();
+    tabsWidget = new QTabWidget();
     
     pn_tab = new QWidget();
     pn_table = create_table(pn_tab);
     tabsWidget->addTab(pn_tab, QString("Публикации"));
-    if (can_edit)
-        connect(pn_table, &QTableView::doubleClicked,
-                this, &MainWindow::edit_publication);
+    connect(pn_table, &QTableView::doubleClicked,
+            this, &MainWindow::edit_publication);
 
     ar_tab = new QWidget;
     ar_table = create_table(ar_tab);
@@ -60,6 +59,7 @@ QTableView* MainWindow::create_table(QWidget* parent){
     QVBoxLayout *layout = new QVBoxLayout(parent);
     layout->addWidget(table);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     return table;
 }
@@ -95,12 +95,15 @@ void MainWindow::update_tab_table(int index){
     for (int i = 0; i < 4; ++i) delete m[i];
 }
 
-    void MainWindow::show_publication_window(int id){
-        PublicationViewWindow *newPublicationWindow = new PublicationViewWindow(db, this, id);
-        disable();
-        connect(newPublicationWindow, &PublicationViewWindow::window_closed,
-                this, [=](){this->delete_child_window(newPublicationWindow); this->enable();});
-    }
+void MainWindow::show_publication_window(int id){
+    PublicationViewWindow *newPublicationWindow = new PublicationViewWindow(db, this, id);
+    disable();
+    connect(newPublicationWindow, &PublicationViewWindow::window_closed, this, [=](){
+        this->delete_child_window(newPublicationWindow);
+        this->enable();
+        this->update_tab_table(this->tabsWidget->currentIndex());
+    });
+}
 
 void MainWindow::delete_child_window(QMainWindow* ptr){
     delete ptr;

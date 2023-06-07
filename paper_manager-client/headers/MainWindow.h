@@ -14,6 +14,7 @@ public:
     MainWindow(PSQLInterface* psqli);
 
 private:
+    QTabWidget *tabsWidget;
     QWidget *pn_tab;
     QWidget *ar_tab;
     QWidget *pr_tab;

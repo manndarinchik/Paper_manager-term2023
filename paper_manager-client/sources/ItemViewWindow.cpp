@@ -60,6 +60,8 @@ ItemViewWindow::ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID
     : BaseWindow(psqli, "Новая запись", parent){
     if (itemID != -1)
         this->setWindowTitle("Редактировать запись");
+    if (can_edit != -1)
+        this->setWindowTitle("Просмотр записи");
     this->itemID = itemID;
     model = nullptr;
 }
@@ -96,11 +98,41 @@ void ItemViewWindow::remove_item(){
     query_database(QString("SELECT remove_publication(%1)").arg(itemID));
     close();
 }
+QHBoxLayout* ItemViewWindow::create_edit_buttons(){
+        QHBoxLayout *btnL = new QHBoxLayout();
+        // centralL->addLayout(btnL);
+        // centralL->setAlignment(btnL, Qt::AlignCenter);
+        QPushButton *finishBtn = new QPushButton(
+            (itemID == -1) ? "Создать" : "Сохранить"
+        );
+        finishBtn->setStyleSheet("background-color: #5eba7d;");
+        finishBtn->setMaximumWidth(100);
+        QPushButton *abortBtn = new QPushButton("Отменить");
+        abortBtn->setStyleSheet("background-color: #ba5e5e;");
+        abortBtn->setMaximumWidth(100);
+
+        connect(finishBtn, &QPushButton::clicked,
+                this, &ItemViewWindow::submit);
+        connect(abortBtn, &QPushButton::clicked,
+                this, &ItemViewWindow::close);
+
+        if (itemID != -1){
+            QPushButton *deleteBtn = new QPushButton("Удалить");
+            deleteBtn->setStyleSheet("background-color: #ba5e5e;");
+            deleteBtn->setMaximumWidth(100);
+            btnL->addWidget(deleteBtn); 
+            btnL->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+            connect(deleteBtn, &QPushButton::clicked, 
+                this, &PublicationViewWindow::remove_item);
+        }
+        btnL->addWidget(finishBtn); 
+        btnL->addWidget(abortBtn);
+
+        return btnL;
+}
 
 PublicationViewWindow::PublicationViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID)
     : ItemViewWindow(psqli, parent, itemID){
-    if (itemID != -1)
-        this->setWindowTitle("Редактировать публикацию");
     newAuthors = {};
     newCompilations = {};
     newDate = new QDateEdit();
@@ -137,29 +169,6 @@ PublicationViewWindow::PublicationViewWindow(PSQLInterface* psqli, QWidget *pare
         populate_with_db_data();
     
     if (can_edit){
-        QHBoxLayout *btnL = new QHBoxLayout();
-        centralL->addLayout(btnL);
-        centralL->setAlignment(btnL, Qt::AlignCenter);
-        QPushButton *finishBtn = new QPushButton(
-            (itemID == -1) ? "Создать" : "Сохранить"
-        );
-        finishBtn->setStyleSheet("background-color: #5eba7d;");
-        finishBtn->setMaximumWidth(100);
-        QPushButton *abortBtn = new QPushButton("Отменить");
-        abortBtn->setStyleSheet("background-color: #ba5e5e;");
-        abortBtn->setMaximumWidth(100);
-        if (itemID != -1){
-            QPushButton *deleteBtn = new QPushButton("Удалить");
-            deleteBtn->setStyleSheet("background-color: #ba5e5e;");
-            deleteBtn->setMaximumWidth(100);
-            btnL->addWidget(deleteBtn); 
-            btnL->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-            connect(deleteBtn, &QPushButton::clicked, 
-                this, &PublicationViewWindow::remove_item);
-        }
-        btnL->addWidget(finishBtn); 
-        btnL->addWidget(abortBtn);
-
         QPushButton *addAuthor = new QPushButton("Добавить автора");
         QPushButton *addCompilation = new QPushButton("Добавить Сборник");
         authorsL->addWidget(addAuthor);
@@ -172,15 +181,13 @@ PublicationViewWindow::PublicationViewWindow(PSQLInterface* psqli, QWidget *pare
                 this, [=](){this->add_table_item(newAuthorsDisplay);});
         connect(addCompilation, &QPushButton::clicked, 
                 this, [=](){this->add_table_item(newCompilationsDisplay);});
-        connect(finishBtn, &QPushButton::clicked,
-                this, &PublicationViewWindow::submit);
-        connect(abortBtn, &QPushButton::clicked,
-                this, &PublicationViewWindow::close);
 
         newPublisherDisplay->setCursor(Qt::PointingHandCursor);
         connect(newPublisherDisplay, &QPushButton::clicked,
                 this, [=](){this->select_from_query(newPublisherDisplay, &newPublisher, 
                 "SELECT publisherID, name FROM PUBLICATION", "publisherID");});
+        
+        centralL->addLayout(create_edit_buttons());
     }
     else {
         newName->setReadOnly(true);
