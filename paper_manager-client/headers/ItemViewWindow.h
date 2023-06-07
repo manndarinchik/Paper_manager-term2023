@@ -33,7 +33,7 @@ protected:
     int itemID;
 
 public:
-    ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
+    ItemViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID = -1);
     ~ItemViewWindow(){};
     static QString insert_array_into_query(QString base_query, std::vector<unsigned int>* list, QString filter_tail);
     static QString format_date(QDate d);
@@ -66,7 +66,7 @@ private:
     std::vector<unsigned int> newCompilations;
 
 public:
-    PublicationViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
+    PublicationViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID = -1);
     ~PublicationViewWindow(){};
 private:
     void populate_with_db_data() override;
@@ -85,7 +85,7 @@ private:
     std::vector<unsigned int> newPublications;
 
 public:
-    AuthorViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
+    AuthorViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID = -1);
     ~AuthorViewWindow(){}
 private:
     void populate_with_db_data() override;
@@ -94,24 +94,25 @@ protected slots:
     void remove_item() override;
 };
 
-// class PublisherViewWindow : public ItemViewWindow
-// {
-//     Q_OBJECT
-// private:
-//     QLineEdit *newName;
-//     QLineEdit *newCountry;
-//     QLineEdit *newCity;
-//     QLineEdit *newAddress;
-//     QLineEdit *newNum;
-//     QLineEdit *newEmail;
-// public:
-//     PublisherViewWindow(PSQLInterface* psqli, QWidget *parent, int publicationID = -1);
-//     ~PublisherViewWindow(){}
-// private:
-//     void populate_with_db_data() override;
-// protected slots:
-//     void submit() override;
-// };
+class PublisherViewWindow : public ItemViewWindow
+{
+    Q_OBJECT
+private:
+    QLineEdit *newName;
+    QLineEdit *newCountry;
+    QLineEdit *newCity;
+    QLineEdit *newAddress;
+    QLineEdit *newNum;
+    QLineEdit *newEmail;
+public:
+    PublisherViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID = -1);
+    ~PublisherViewWindow(){}
+private:
+    void populate_with_db_data() override;
+protected slots:
+    void submit() override;
+    void remove_item() override;
+};
 
 
 // class CompilationViewWindow : public ItemViewWindow

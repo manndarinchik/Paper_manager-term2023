@@ -111,9 +111,9 @@ void MainWindow::create_itemview(int id){
     case 1:
         bind_itemview_window(new AuthorViewWindow(db, this, id));
         break;
-    // case 2:
-    //     show_itemview_window(pn_table, new PublisherViewWindow(db, this));
-    //     break;
+    case 2:
+        bind_itemview_window(new PublisherViewWindow(db, this, id));
+        break;
     // case 3:
     //     show_itemview_window(pn_table, new CompilationViewWindow(db, this));
     //     break;

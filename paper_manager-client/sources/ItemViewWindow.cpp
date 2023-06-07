@@ -337,7 +337,7 @@ void AuthorViewWindow::submit(){
     QString error_msg = "";
     if (newName->text().isEmpty())
         error_msg.append("Не указано имя автора.\n");
-    if (newName->text().isEmpty())
+    if (newDegree->text().isEmpty())
         error_msg.append("Не указано ученая степень автора.\n");
     
     if (!error_msg.isEmpty()){
@@ -365,5 +365,87 @@ void AuthorViewWindow::submit(){
 
 void AuthorViewWindow::remove_item(){
     query_database(QString("SELECT remove_author(%1)").arg(itemID));
+    close();
+}
+
+// --------------------
+// -- PUBLISHER VIEW --
+// --------------------
+PublisherViewWindow::PublisherViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID) : 
+    ItemViewWindow(psqli, parent, itemID){
+    newName = new QLineEdit();
+    newCountry = new QLineEdit();
+    newCity = new QLineEdit();
+    newAddress = new QLineEdit();
+    newNum = new QLineEdit();
+    newEmail = new QLineEdit();
+
+    QFormLayout *form = new QFormLayout();
+    centralL->addLayout(form);
+    form->addRow("Полное название:", newName);
+    form->addRow("Страна:", newCountry);
+    form->addRow("Город:", newCity);
+    form->addRow("Адресс:", newAddress);
+    form->addRow("Телефонный номер:", newEmail);
+    form->addRow("Эл. почта:", newEmail);
+
+    if (itemID != -1)
+        populate_with_db_data();
+
+    if (can_edit){
+        centralL->addLayout(create_edit_buttons());
+    } else {
+        newName->setDisabled(true);
+        newCountry->setDisabled(true);
+        newCity->setDisabled(true);
+        newAddress->setDisabled(true);
+        newNum->setDisabled(true);
+        newEmail->setDisabled(true);
+    } 
+    show();    
+}
+
+void PublisherViewWindow::populate_with_db_data(){
+    QSqlQueryModel* model = query_database(QString("SELECT * FROM PUBLISHER WHERE publisherID=%1").arg(itemID));
+    
+    newName->setText(model->data(model->index(0, 1)).toString());
+    newCountry->setText(model->data(model->index(0, 2)).toString());
+    newCity->setText(model->data(model->index(0, 3)).toString());
+    newAddress->setText(model->data(model->index(0, 4)).toString());
+    newNum->setText(model->data(model->index(0, 5)).toString());
+    newEmail->setText(model->data(model->index(0, 6)).toString());
+    
+    delete model;
+}
+
+void PublisherViewWindow::submit(){
+    QString error_msg = "";
+    if (newName->text().isEmpty())
+        error_msg.append("Не указано название издателя.\n");
+    if (newCountry->text().isEmpty())
+        error_msg.append("Не указана страна издателя.\n");
+    
+    if (!error_msg.isEmpty()){
+        show_error(error_msg);
+        return;
+    }
+
+    if (itemID == -1){
+        QSqlQueryModel* model = query_database(
+            QString("SELECT * FROM add_publisher('%1', '%2', '%3', '%4', '%5', '%6'); ").arg(
+                newName->text(), newCountry->text(), newCity->text(), newAddress->text(), newNum->text(), newEmail->text()
+        ));
+        itemID = model->data(model->index(0,0)).toInt();
+        delete model;
+    } else 
+        delete query_database(
+            QString("SELECT * FROM edit_publisher(%1, '%2', '%3', '%4', '%5', '%6', '%7'); ").arg(
+                QString::number(itemID), newName->text(), newCountry->text(), newCity->text(), newAddress->text(), newNum->text(), newEmail->text()
+        ));
+    close();
+}
+
+void PublisherViewWindow::remove_item(){
+    query_database(QString("SELECT remove_publisher(%1)").arg(itemID));
     close();
 }
