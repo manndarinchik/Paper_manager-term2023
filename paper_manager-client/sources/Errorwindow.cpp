@@ -29,6 +29,7 @@ ErrorWindow::~ErrorWindow(){
 
 void ErrorWindow::invoke_window(QString message){
     error_message->setText(message);
+    parentWidget()->setDisabled(true);
     this->show();
     QPoint p = parentWidget()->pos();
     QPoint pCenter(parentWidget()->frameSize().width()/2, parentWidget()->frameSize().height()/2);
@@ -39,6 +40,7 @@ void ErrorWindow::invoke_window(QString message){
 
 void ErrorWindow::close_message(){
     error_message->setText("");
+    parentWidget()->setDisabled(false);
     this->close(); 
 }
     

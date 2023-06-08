@@ -37,19 +37,15 @@ QSqlQueryModel* BaseWindow::query_database(QString query)
     QSqlQueryModel* model = db->issue_query(query);
     QSqlError error = model->lastError();
     qDebug() << "Query '" << model->query().lastQuery() << "': " << (!error.isValid() ? "OK" : error.databaseText());
-    switch (error.type())
-    {
-    case QSqlError::NoError:
-        return model; break;
-    case QSqlError::ConnectionError:
-        show_error("Не удалось подключиться к базе данных"); break;
-    case QSqlError::StatementError:
-        show_error("Неверный запрос к базе данных, обратитесь к администратору."); break;
-    case QSqlError::TransactionError:
-        show_error("Ошибка транзакции, обратитесь к администратору."); break;
-    default:
-        show_error("Неизвестная ошибка, обратитесь к администратору."); break;
-    }
+    if (!error.isValid())
+        return model;
+    
+    QString error_text = error.databaseText();
+    if (error.type() == QSqlError::ConnectionError)
+        emit show_error("Не удалось подключиться к базе данных");
+    else if (error_text.indexOf("violates not-null constraint") != -1)
+        emit show_error("Удаление невозможно: существуют зависимые объекты.");
+
     delete model;
     return nullptr;
 }

@@ -447,8 +447,8 @@ void PublisherViewWindow::submit(){
 }
 
 void PublisherViewWindow::remove_item(){
-    query_database(QString("SELECT remove_publisher(%1)").arg(itemID));
-    close();
+    if (query_database(QString("SELECT remove_publisher(%1)").arg(itemID)) != nullptr)
+        close();
 }
 
 // ----------------------

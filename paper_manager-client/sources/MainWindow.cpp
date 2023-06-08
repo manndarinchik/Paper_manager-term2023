@@ -124,7 +124,7 @@ void MainWindow::bind_itemview_window(ItemViewWindow* window){
     connect(window, &PublicationViewWindow::window_closed, this, [=](){
         this->enable();
         int n =this->tabsWidget->currentIndex();
-        tabsWidget->setCurrentIndex(0);
+        tabsWidget->setCurrentIndex(n==0 ? 1:0);
         tabsWidget->setCurrentIndex(n);
     });
 }
