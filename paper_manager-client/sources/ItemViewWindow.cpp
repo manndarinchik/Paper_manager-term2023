@@ -480,13 +480,13 @@ CompilationViewWindow::CompilationViewWindow(PSQLInterface* psqli, QWidget *pare
 
         connect(addPublication, &QPushButton::clicked,
                 this, [=](){this->add_table_item(newPublicationsView);});
-        form->addRow("Публикации издательства", addPublication);
+        form->addRow("Публикации", addPublication);
 
         connect(newPublisherDisplay, &QPushButton::clicked,
                 this, [=](){this->select_from_query(newPublisherDisplay, &newPublisher, 
                 "SELECT publisherID, fullname FROM PUBLISHER", "publisherID");});
     } else {
-        centralL->addWidget(new QLabel("Публикации автора"));
+        centralL->addWidget(new QLabel("Публикации"));
         newName->setDisabled(true);
         newDate->setDisabled(true);
         newPublisherDisplay->setDefault(true);

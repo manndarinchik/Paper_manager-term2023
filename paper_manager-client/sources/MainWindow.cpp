@@ -66,8 +66,8 @@ MainWindow::MainWindow(PSQLInterface *psqli)
     }
 
     tabsWidget->setCurrentIndex(1);
-    show();
     tabsWidget->setCurrentIndex(0);
+    show();
 }
 
 QTableView* MainWindow::create_table(QWidget* parent){
@@ -89,7 +89,6 @@ void MainWindow::update_table(QTableView* table, QString query, QStringList labe
     table->setModel(query_database(query));
     table->setColumnHidden(0, true);
     for (int i = 0; i < labels.size(); ++i){
-        qDebug() << table->horizontalHeader();
         table->model()->setHeaderData(i+1, Qt::Horizontal, labels.at(i));
     }
 }
@@ -124,6 +123,8 @@ void MainWindow::bind_itemview_window(ItemViewWindow* window){
     subwindows.push_back(window);
     connect(window, &PublicationViewWindow::window_closed, this, [=](){
         this->enable();
-        tabsWidget->setCurrentIndex(this->tabsWidget->currentIndex());
+        int n =this->tabsWidget->currentIndex();
+        tabsWidget->setCurrentIndex(0);
+        tabsWidget->setCurrentIndex(n);
     });
 }

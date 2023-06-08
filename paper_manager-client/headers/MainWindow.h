@@ -31,6 +31,8 @@ private:
     void create_itemview(int id = -1);
     void bind_itemview_window(ItemViewWindow* window);
     void update_table(QTableView* table, QString query, QStringList labels);
+    void update_table(QTableView* table);
+
 
 };
 #endif // MAINWINDOW_H
