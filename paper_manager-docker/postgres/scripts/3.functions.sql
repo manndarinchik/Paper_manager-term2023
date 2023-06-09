@@ -4,11 +4,14 @@ CREATE OR REPLACE FUNCTION add_author(
 	newDegree VARCHAR(30)
 ) RETURNS int AS
 $$
-DECLARE res INT;
+DECLARE res INT DEFAULT -1;
 BEGIN
-	-- TODO: проверка на наличие имени
-	INSERT INTO AUTHOR_COMPOSITE(name, degree) VALUES(newName, newDegree)
-	RETURNING authorID INTO res;
+	IF (CAST((SELECT COUNT(*) FROM AUTHOR WHERE name=newName) as INT)> 0) 
+		THEN RAISE EXCEPTION 'Автор с именем "%" уже существует', newName; 
+	ELSE
+		INSERT INTO AUTHOR_COMPOSITE(name, degree) VALUES(newName, newDegree)
+		RETURNING authorID INTO res;
+	END IF;
 	RETURN res;
 END;
 $$ LANGUAGE  plpgsql;
@@ -20,10 +23,14 @@ CREATE OR REPLACE FUNCTION edit_author(
 ) RETURNS void AS
 $$
 BEGIN
-	UPDATE AUTHOR_COMPOSITE 
-		SET name = newName,
-		degree = newDegree 
-	WHERE authorID = editID;
+	IF (CAST((SELECT authorID FROM AUTHOR WHERE name=newName LIMIT 1) as INT) != editID) 
+		THEN RAISE EXCEPTION 'Автор с именем "%" уже существует', newName; 
+	ELSE
+		UPDATE AUTHOR_COMPOSITE 
+			SET name = newName,
+			degree = newDegree 
+		WHERE authorID = editID;
+	END IF;
 END;
 $$ LANGUAGE  plpgsql;
 
@@ -44,10 +51,14 @@ CREATE OR REPLACE FUNCTION add_publication(
 	newDate DATE
 ) RETURNS int AS
 $$
-DECLARE res INT;
+DECLARE res INT DEFAULT -1;
 BEGIN
-	INSERT INTO PUBLICATION(name, type, publisherID, publicationDate) VALUES(newName, CAST (newType AS SMALLINT), newPublisher, newDate)
-	RETURNING publicationID INTO res;
+	IF (CAST((SELECT COUNT(*) FROM PUBLICATION WHERE name=newName) as INT)> 0) 
+		THEN RAISE EXCEPTION 'Публикация с названием "%" уже существует', newName; 
+	ELSE
+		INSERT INTO PUBLICATION(name, type, publisherID, publicationDate) VALUES(newName, CAST (newType AS SMALLINT), newPublisher, newDate)
+		RETURNING publicationID INTO res;
+	END IF;
 	RETURN res;
 END;
 $$ LANGUAGE plpgsql;
@@ -61,12 +72,16 @@ CREATE OR REPLACE FUNCTION edit_publication(
 ) RETURNS void AS
 $$
 BEGIN
-	UPDATE PUBLICATION 
-		SET name = newName,
-		type = CAST(newType AS SMALLINT),
-		publisherID = newPublisher,
-		publicationDate = newDate
-	WHERE publicationID = editID;
+	IF (CAST((SELECT publicationID FROM PUBLICATION WHERE name=newName LIMIT 1) as INT) != editID) 
+		THEN RAISE EXCEPTION 'Публикация с названием "%" уже существует', newName; 
+	ELSE
+		UPDATE PUBLICATION 
+			SET name = newName,
+			type = CAST(newType AS SMALLINT),
+			publisherID = newPublisher,
+			publicationDate = newDate
+		WHERE publicationID = editID;
+	END IF;
 END;
 $$ LANGUAGE  plpgsql;
 
@@ -94,7 +109,7 @@ BEGIN
 	COMMIT;
 	IF (SELECT COUNT(*) FROM PUBLICATION_AUTHORS pa WHERE pa.publicationID=editID)=0
 	THEN ROLLBACK;
-	RAISE EXCEPTION 'Attempt to set empty list at publicationID=%', editID;
+	RAISE EXCEPTION 'У публикации % должен быть хотя бы 1 автор', (SELECT name FROM PUBLICATION WHERE publicationID=editID);
 	END IF;
 END;
 $$ LANGUAGE  plpgsql;
@@ -110,12 +125,15 @@ CREATE OR REPLACE FUNCTION add_publisher(
 	newEmail VARCHAR(100)
 ) RETURNS int AS
 $$
-DECLARE res INT;
+DECLARE res INT DEFAULT -1;
 BEGIN
-	-- TODO: проверка на наличие имени
-	INSERT INTO PUBLISHER(fullName, country, city, address, phoneNumber, email)
-	VALUES(newName, newCountry, newCity, newAddress, newPhoneNumber, newEmail)
-	RETURNING publisherID INTO res;
+	IF (CAST((SELECT COUNT(*) FROM PUBLISHER WHERE fullName=newName) as INT) > 0) 
+		THEN RAISE EXCEPTION 'Издатель с названием "%" уже существует', newName; 
+	ELSE
+		INSERT INTO PUBLISHER(fullName, country, city, address, phoneNumber, email)
+		VALUES(newName, newCountry, newCity, newAddress, newPhoneNumber, newEmail)
+		RETURNING publisherID INTO res;
+	END IF;
 	RETURN res;
 END;
 $$ LANGUAGE  plpgsql;
@@ -131,13 +149,17 @@ CREATE OR REPLACE FUNCTION edit_publisher(
 ) RETURNS void AS
 $$
 BEGIN
-	UPDATE PUBLISHER SET fullName = newName,
-		country = newCountry,
-		city = newCity,
-		address = newAddress,
-		phoneNumber = newPhoneNumber,
-		email = newEmail
-	WHERE publisherID = editID;
+	IF (CAST((SELECT publisherID FROM PUBLISHER WHERE fullName=newName LIMIT 1) as INT) != editID) 
+		THEN RAISE EXCEPTION 'Издатель с названием "%" уже существует', newName; 
+	ELSE
+		UPDATE PUBLISHER SET fullName = newName,
+			country = newCountry,
+			city = newCity,
+			address = newAddress,
+			phoneNumber = newPhoneNumber,
+			email = newEmail
+		WHERE publisherID = editID;
+	END IF;
 END;
 $$ LANGUAGE  plpgsql;
 
@@ -158,11 +180,14 @@ CREATE OR REPLACE FUNCTION add_compilation(
 	newDate DATE
 ) RETURNS int AS
 $$
-DECLARE res INT;
+DECLARE res INT DEFAULT -1;
 BEGIN
-	-- TODO: проверка на наличие имени
-	INSERT INTO COMPILATION(name, publisherID, publicationDate) VALUES (newName, newPublisherID, newDate)
-	RETURNING compilationID INTO res;
+	IF (CAST((SELECT COUNT(*) FROM COMPILATION WHERE name=newName) as INT) > 0) 
+		THEN RAISE EXCEPTION 'Сборник с названием "%" уже существует', newName;
+	ELSE
+		INSERT INTO COMPILATION(name, publisherID, publicationDate) VALUES (newName, newPublisherID, newDate)
+		RETURNING compilationID INTO res;
+	END IF;
 	RETURN res;
 END;
 $$ LANGUAGE  plpgsql;
@@ -176,11 +201,15 @@ CREATE OR REPLACE FUNCTION edit_compilation(
 $$
 DECLARE res INT;
 BEGIN
-	UPDATE COMPILATION SET
-		name = newName,
-		publisherID = newPublisherID, 
-		publicationDate = newDate
-	WHERE compilationID = cID;
+	IF (CAST((SELECT compilationID FROM COMPILATION WHERE name=newName LIMIT 1) AS INT) != cID) 
+		THEN RAISE EXCEPTION 'Сборник с названием "%" уже существует', newName; 
+	ELSE
+		UPDATE COMPILATION SET
+			name = newName,
+			publisherID = newPublisherID, 
+			publicationDate = newDate
+		WHERE compilationID = cID;
+	END IF;
 END;
 $$ LANGUAGE  plpgsql;
 
@@ -208,7 +237,33 @@ BEGIN
 	COMMIT;
 	IF (SELECT COUNT(*) FROM COMPILATION_ENTRY ce WHERE ce.compilationID=editID)=0
 	THEN ROLLBACK;
-	RAISE EXCEPTION 'Attempt to set empty list at compilationID=%', editID;
+	RAISE EXCEPTION 'В сборнике % должна быть хотя бы 1 публикация', (SELECT name FROM COMPILATION WHERE compilationID=editID);
+	END IF;
+END;
+$$ LANGUAGE  plpgsql;
+
+CREATE OR REPLACE PROCEDURE set_publication_compilations(
+	editID INT,
+	compilationIDs INT[]
+) AS
+$$
+DECLARE cID INT;
+DECLARE empty_comps text[];
+BEGIN
+	DELETE FROM COMPILATION_ENTRY ce WHERE ce.publicationID = editID; 
+	FOREACH cID IN ARRAY compilationIDs
+	LOOP
+		INSERT INTO COMPILATION_ENTRY(publicationID, compilationID) VALUES(editID, cID);
+	END LOOP;
+	COMMIT;
+	
+	SELECT array_agg(c.name) INTO empty_comps 
+		FROM COMPILATION_ENTRY ce JOIN COMPILATION c on ce.compilationID=c.compilationID
+		GROUP BY ce.compilationID HAVING COUNT(ce.publicationID)=0;
+	
+	IF (CARDINALITY(empty_comps)>0)
+	THEN ROLLBACK;
+	RAISE EXCEPTION 'В сборниках "%" должна быть хотя бы 1 публикация', array_to_string(empty_comps, ', ');
 	END IF;
 END;
 $$ LANGUAGE  plpgsql;
@@ -291,8 +346,8 @@ BEGIN
 		IF NOT FOUND THEN EXIT; END IF;
 		IF NOT array_length(i.a_IDs, 1) = 1 THEN
 			DELETE FROM PUBLICATION_AUTHORS pa WHERE pa.authorID = aID; 
-		ELSE
-			-- TODO: raise warning;
+		ELSE 
+			RAISE EXCEPTION 'У публикации % должен быть хотя бы 1 автор', (SELECT name FROM PUBLICATION WHERE publicationID=i.p_id);	
 		END IF;
 	END LOOP;
 	CLOSE cur;

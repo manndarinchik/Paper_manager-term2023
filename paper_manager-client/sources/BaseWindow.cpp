@@ -3,6 +3,7 @@
 #include <QSpacerItem>
 #include <QDebug>
 #include "BaseWindow.h"
+#include <QRegExp>
 
 BaseWindow::BaseWindow(PSQLInterface *psqli, const char *ch, QWidget *parent)
     : QMainWindow()
@@ -40,20 +41,23 @@ QSqlQueryModel* BaseWindow::query_database(QString query)
     if (!error.isValid())
         return model;
     
-    QString error_text = error.databaseText();
+    QRegExp rx("\n");
+    rx.setPatternSyntax(QRegExp::FixedString);
+    int end = rx.indexIn(error.databaseText());
+    qDebug() << end;
+    QString error_text = error.databaseText().mid(6, end-6);
+
     if (error.type() == QSqlError::ConnectionError)
         emit show_error("Не удалось подключиться к базе данных");
-    else if (error_text.indexOf("violates not-null constraint") != -1)
-        emit show_error("Удаление невозможно: существуют зависимые объекты.");
-    else if (error_text.indexOf("Attempt to set empty list") != -1)
-        emit show_error("Удаление невозможно: существуют зависимые объекты.");
+    else 
+        emit show_error(error_text);
 
     delete model;
     return nullptr;
 }
 
 void BaseWindow::closeEvent(QCloseEvent *event){
-    qDebug() << "Closing window";
+    //qDebug() << "Closing window";
     for (int i = 0; i < subwindows.size(); ++i){
         if (subwindows.at(i) != nullptr)
             subwindows.at(i)->close();

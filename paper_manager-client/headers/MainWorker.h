@@ -15,6 +15,9 @@ private:
     LoginWindow* l;
 public:
     MainWorker(){
+        w = nullptr;
+        db = nullptr;
+        l = nullptr;
         start_login_window();
     }
     ~MainWorker(){

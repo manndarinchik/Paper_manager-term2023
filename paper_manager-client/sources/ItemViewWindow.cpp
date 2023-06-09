@@ -40,9 +40,9 @@ void ListTableView::update_display(){
         setColumnHidden(hidden_colums.at(i), true);
 }
 void ListTableView::show_context_menu(QPoint pos){
-    qDebug() << "Item deletion requested at: ";
+    //qDebug() << "Item deletion requested at: ";
     QModelIndex cell = indexAt(pos).siblingAtColumn(0);
-    qDebug() << cell.data().toUInt();
+    //qDebug() << cell.data().toUInt();
     QMenu *menu = new QMenu(this);  
     menu->addAction("Удалить", this, [=](){
         for (int i = 0; i < list->size(); ++i)
@@ -243,8 +243,6 @@ void PublicationViewWindow::submit(){
         error_msg.append("Не указан тип публикации.\n");
     if (newPublisher == -1)
         error_msg.append("Не указан издатель.\n");
-    if (newAuthors.empty())
-        error_msg.append("Должен быть указан хотя бы один автор публикации.\n");
     
     if (!error_msg.isEmpty()){
         show_error(error_msg);
@@ -252,28 +250,31 @@ void PublicationViewWindow::submit(){
     }
 
     QString query; 
-    QSqlQueryModel* model;
+    bool error = false;
     if (itemID == -1){
         query = QString("SELECT * FROM add_publication('%1', %2, %3, %4); ").arg(
             newName->text(), QString::number(newType->currentIndex()), QString::number(newPublisher), format_date(newDate->date())
         );
-        model = query_database(query);
-        itemID = model->data(model->index(0,0)).toInt();
-    } else 
-        query = QString("SELECT edit_publication(%1, '%2', %3, %4, %5); ").arg(
+        QSqlQueryModel* model = query_database(query);
+        error = model == nullptr;
+        if (!error) itemID = model->data(model->index(0,0)).toInt();
+        delete model;
+    } else
+        error = query_database(QString("SELECT edit_publication(%1, '%2', %3, %4, %5); ").arg(
             QString::number(itemID), newName->text(), QString::number(newType->currentIndex()), QString::number(newPublisher), format_date(newDate->date())
-        );
-        model = query_database(query);
-    query = insert_array_into_query(
-        QString("CALL set_publication_authors(%1, ARRAY[").arg(itemID), &newAuthors, "]::integer[]); " 
-    )
-    //  + insert_array_into_query(
-    //     QString("CALL set_publication_compilations(%1, ARRAY[").arg(itemID), &newCompilations, "]::integer[]);" 
-    // )
-    ;
-    model = query_database(query);
-    delete model;
-    close();
+        )) == nullptr;
+    if (!error)
+        error = query_database(
+            insert_array_into_query(
+            QString("CALL set_publication_authors(%1, ARRAY[").arg(itemID), &newAuthors, "]::integer[]); " 
+        )) == nullptr;
+    if (!error)
+        error = query_database(
+            insert_array_into_query(
+            QString("CALL set_publication_compilations(%1, ARRAY[").arg(itemID), &newCompilations, "]::integer[]);" 
+        )) == nullptr;
+        
+    if (!error) close();
 }
 void PublicationViewWindow::remove_item(){
     query_database(QString("SELECT remove_publication(%1)").arg(itemID));
@@ -344,22 +345,25 @@ void AuthorViewWindow::submit(){
         return;
     }
 
+    bool error = false;
     if (itemID == -1){
         QSqlQueryModel* model = query_database(
             QString("SELECT * FROM add_author('%1', '%2'); ").arg(
                 newName->text(), newDegree->text()
         ));
         itemID = model->data(model->index(0,0)).toInt();
+        error = model == nullptr;
         delete model;
     } else 
-        delete query_database(
+        error = query_database(
             QString("SELECT edit_author(%1, '%2', '%3'); ").arg(
                 QString::number(itemID), newName->text(), newDegree->text()
-        ));
-    delete query_database(insert_array_into_query(
-        QString("CALL set_authors_publications(%1, ARRAY[").arg(itemID), &newPublications, "]::integer[]); " 
-    ));
-    close();
+        )) == nullptr;
+    if (!error)
+        error = query_database(insert_array_into_query(
+            QString("CALL set_authors_publications(%1, ARRAY[").arg(itemID), &newPublications, "]::integer[]); " 
+        )) == nullptr;
+    if (!error) close();
 }
 
 void AuthorViewWindow::remove_item(){
@@ -453,19 +457,21 @@ void PublisherViewWindow::submit(){
         return;
     }
 
+    bool error = false;
     if (itemID == -1){
         QSqlQueryModel* model = query_database(
             QString("SELECT * FROM add_publisher('%1', '%2', '%3', '%4', '%5', '%6'); ").arg(
                 newName->text(), newCountry->text(), newCity->text(), newAddress->text(), newNum->text(), newEmail->text()
         ));
         itemID = model->data(model->index(0,0)).toInt();
+        error = model == nullptr;
         delete model;
     } else 
-        delete query_database(
+        error = query_database(
             QString("SELECT * FROM edit_publisher(%1, '%2', '%3', '%4', '%5', '%6', '%7'); ").arg(
                 QString::number(itemID), newName->text(), newCountry->text(), newCity->text(), newAddress->text(), newNum->text(), newEmail->text()
-        ));
-    close();
+        )) == nullptr;
+    if (!error) close();
 }
 
 void PublisherViewWindow::remove_item(){
@@ -551,22 +557,25 @@ void CompilationViewWindow::submit(){
         return;
     }
 
+    bool error = false;
     if (itemID == -1){
         QSqlQueryModel* model = query_database(
             QString("SELECT * FROM add_compilation('%1', %2, %3); ").arg(
                 newName->text(), QString::number(newPublisher), format_date(newDate->date())
         ));
         itemID = model->data(model->index(0,0)).toInt();
+        error = model == nullptr;
         delete model;
     } else 
-        delete query_database(
+        error = query_database(
             QString("SELECT * FROM edit_compilation(%1, '%2', %3, %4); ").arg(
                 QString::number(itemID), newName->text(), QString::number(newPublisher), format_date(newDate->date())
-            ));
-    delete query_database(insert_array_into_query(
-        QString("CALL set_compilation_publications(%1, ARRAY[").arg(itemID), &newPublications, "]::integer[]); " 
-    ));
-    close();
+            )) == nullptr;
+    if (!error)
+        error =query_database(insert_array_into_query(
+            QString("CALL set_compilation_publications(%1, ARRAY[").arg(itemID), &newPublications, "]::integer[]); " 
+        )) == nullptr;
+    if (!error) close();
 }
 
 void CompilationViewWindow::remove_item(){

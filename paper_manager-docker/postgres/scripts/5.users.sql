@@ -15,7 +15,7 @@ GRANT EXECUTE ON FUNCTION
 TO viewer_role;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA PUBLIC TO viewer_role;
 
-CREATE ROLE editor_role INHERIT;
+CREATE ROLE editor_role INHERIT IN ROLE viewer_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE 
 	PUBLISHER, PUBLICATION, AUTHOR, COMPILATION, PUBLICATION_AUTHORS, COMPILATION_ENTRY,
 	PUBLICATION_COMPOSITE,
@@ -30,9 +30,7 @@ TO editor_role;
 GRANT EXECUTE ON PROCEDURE
 	set_publication_authors,
 	set_compilation_publications,
-	set_authors_publications,
-	get_publishers_publications,
-	get_publishers_compilations
+	set_authors_publications
 TO editor_role;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA PUBLIC TO editor_role;
 
