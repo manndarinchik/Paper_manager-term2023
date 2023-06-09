@@ -15,20 +15,31 @@ private:
     LoginWindow* l;
 public:
     MainWorker(){
+        start_login_window();
+    }
+    ~MainWorker(){
+        if (w != nullptr) delete w;
+        if (db != nullptr) delete db;
+    }
+private slots:
+    void start_login_window(){
         db = new PSQLInterface();
         l = new LoginWindow(db);
         l->show();
         connect(l, &LoginWindow::login_successful,
                 this, &MainWorker::start_main_window);
     }
-    ~MainWorker(){
-        delete w;
-        delete db;
-    }
-private slots:
     void start_main_window(){
         w = new MainWindow(db);
+        connect(w, &MainWindow::logout, this, &MainWorker::reset_connection);
         delete l;
+    }
+    void reset_connection(){
+        delete w;
+        delete db;
+        w = nullptr;
+        db = nullptr;
+        start_login_window();
     }
 };
 #endif //MAINWORKER_H

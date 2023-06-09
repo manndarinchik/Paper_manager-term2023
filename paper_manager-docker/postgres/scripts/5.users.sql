@@ -9,7 +9,9 @@ TO viewer_role;
 GRANT EXECUTE ON FUNCTION 
 	get_publication_authors,
 	get_publication_compilations,
-	get_authors_publications
+	get_authors_publications,
+	get_publishers_publications,
+	get_publishers_compilations
 TO viewer_role;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA PUBLIC TO viewer_role;
 
@@ -28,7 +30,9 @@ TO editor_role;
 GRANT EXECUTE ON PROCEDURE
 	set_publication_authors,
 	set_compilation_publications,
-	set_authors_publications
+	set_authors_publications,
+	get_publishers_publications,
+	get_publishers_compilations
 TO editor_role;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA PUBLIC TO editor_role;
 

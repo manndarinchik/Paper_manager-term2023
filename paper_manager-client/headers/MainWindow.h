@@ -33,6 +33,8 @@ private:
     void update_table(QTableView* table, QString query, QStringList labels);
     void update_table(QTableView* table);
 
+signals:
+    void logout();
 
 };
 #endif // MAINWINDOW_H

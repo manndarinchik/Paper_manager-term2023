@@ -10,7 +10,14 @@ MainWindow::MainWindow(PSQLInterface *psqli)
     this->resize(800, 500);
 
     tabsWidget = new QTabWidget();
-    
+
+    QPushButton* exit_btn = new QPushButton(QString("%1: Выйти").arg(db->get_login()), tabsWidget);
+    tabsWidget->setCornerWidget(exit_btn, Qt::TopRightCorner);
+    connect(exit_btn, &QPushButton::clicked, this, [=](){
+        close();
+        emit logout();
+    });
+
     pn_tab = new QWidget();
     pn_table = create_table(pn_tab);
     tabsWidget->addTab(pn_tab, QString("Публикации"));
