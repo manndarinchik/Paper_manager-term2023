@@ -45,6 +45,8 @@ QSqlQueryModel* BaseWindow::query_database(QString query)
         emit show_error("Не удалось подключиться к базе данных");
     else if (error_text.indexOf("violates not-null constraint") != -1)
         emit show_error("Удаление невозможно: существуют зависимые объекты.");
+    else if (error_text.indexOf("Attempt to set empty list") != -1)
+        emit show_error("Удаление невозможно: существуют зависимые объекты.");
 
     delete model;
     return nullptr;

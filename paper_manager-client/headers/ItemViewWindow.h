@@ -105,6 +105,11 @@ private:
     QLineEdit *newAddress;
     QLineEdit *newNum;
     QLineEdit *newEmail;
+    ListTableView *newPublicationsDisplay;
+    ListTableView *newCompilationsDisplay;
+    std::vector<unsigned int> newPublications;
+    std::vector<unsigned int> newCompilations;
+    
 public:
     PublisherViewWindow(PSQLInterface* psqli, QWidget *parent, int itemID = -1);
     ~PublisherViewWindow(){}

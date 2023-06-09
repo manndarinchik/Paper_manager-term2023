@@ -253,12 +253,19 @@ RETURNS setof compilation_composite AS $$ BEGIN
 			COALESCE(COUNT(ce.publicationID), 0) publicationCount
 		FROM COMPILATION c
 		JOIN COMPILATION_ENTRY ce ON ce.compilationID = c.compilationID
-		GROUP BY c.compilationID HAVING 															 >= 1 AND c.publisherID=_id;
+		GROUP BY c.compilationID HAVING COUNT (*) >= 0 AND c.publisherID=_id
 	)
 	SELECT tmp.compilationID, tmp.name, p.fullName, tmp.publicationdate, tmp.publicationCount FROM tmp
 	JOIN PUBLISHER p ON tmp.publisherID = p.publisherID;
 END; $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION get_publishers_publications(_id INT)
+RETURNS SETOF PUBLICATION AS $$ BEGIN
+	RETURN QUERY 
+		SELECT p.*
+		FROM PUBLICATION p
+		WHERE publisherID = _id;
+END; $$ LANGUAGE  plpgsql;
 
 CREATE PROCEDURE set_authors_publications(
 	aID INT,

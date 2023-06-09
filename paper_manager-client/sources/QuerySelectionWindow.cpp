@@ -10,8 +10,8 @@ QuerySelectionWindow::QuerySelectionWindow(PSQLInterface* psqli, QWidget *parent
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     confirm = new QPushButton("Подтвердить", this);
-    create_value = new QPushButton("Создать", this);
-    centralL->addWidget(create_value);
+//     create_value = new QPushButton("Создать", this);
+//     centralL->addWidget(create_value);
     centralL->addWidget(table);
     centralL->addWidget(confirm);
 
@@ -29,8 +29,8 @@ QuerySelectionWindow::QuerySelectionWindow(PSQLInterface* psqli, QWidget *parent
     connect(confirm, &QPushButton::clicked,
             this, &QuerySelectionWindow::confirm_selection);
             
-    connect(create_value, &QPushButton::clicked,
-            this, [=](){emit value_create_request();});
+//     connect(create_value, &QPushButton::clicked,
+//             this, [=](){emit value_create_request();});
 
     show();
 }

@@ -229,8 +229,6 @@ void PublicationViewWindow::populate_with_db_data(){
 
     for (int i = 0; i < authors->rowCount(); ++i)
         newAuthors.push_back(authors->data(authors->index(i, 0)).toUInt());
-    for (int i = 0; i < compilations->rowCount(); ++i)
-        newCompilations.push_back(compilations->data(compilations->index(i, 0)).toUInt());
     delete authors; delete compilations; delete model;
     newAuthorsDisplay->update_display();
     newCompilationsDisplay->update_display();
@@ -390,6 +388,19 @@ PublisherViewWindow::PublisherViewWindow(PSQLInterface* psqli, QWidget *parent, 
     form->addRow("Телефонный номер", newNum);
     form->addRow("Эл. почта", newEmail);
 
+    QHBoxLayout *tablesL = new QHBoxLayout();
+    QVBoxLayout *publicationsL = new QVBoxLayout();
+    QVBoxLayout *compilationsL = new QVBoxLayout();
+    tablesL->addLayout(publicationsL);
+    tablesL->addLayout(compilationsL);
+    newCompilationsDisplay = new ListTableView(db, this, "SELECT compilationID, name FROM COMPILATION", "compilationID", &newCompilations);
+    newPublicationsDisplay = new ListTableView(psqli, this, "SELECT publicationID, name FROM PUBLICATION_COMPOSITE", "publicationID", &newPublications);
+    publicationsL->addWidget(new QLabel("Публикации"));
+    compilationsL->addWidget(new QLabel("Сборники"));
+    publicationsL->addWidget(newPublicationsDisplay);
+    compilationsL->addWidget(newCompilationsDisplay);
+    centralL->addLayout(tablesL);
+
     if (itemID != -1)
         populate_with_db_data();
 
@@ -416,7 +427,18 @@ void PublisherViewWindow::populate_with_db_data(){
     newNum->setText(model->data(model->index(0, 6)).toString());
     newEmail->setText(model->data(model->index(0, 7)).toString());
     
-    delete model;
+    QSqlQueryModel* compilations = query_database(QString("SELECT compilationID, name FROM get_publishers_compilations(%1)").arg(itemID));
+    QSqlQueryModel* publications = query_database(QString("SELECT publicationID, name FROM get_publishers_publications(%1)").arg(itemID));
+
+    for (int i = 0; i < publications->rowCount(); ++i)
+            newPublications.push_back(publications->data(publications->index(i, 0)).toUInt());
+    for (int i = 0; i < compilations->rowCount(); ++i)
+        newCompilations.push_back(compilations->data(compilations->index(i, 0)).toUInt());
+    
+    newCompilationsDisplay->update_display();
+    newPublicationsDisplay->update_display();
+
+    delete publications; delete compilations; delete model;
 }
 
 void PublisherViewWindow::submit(){
