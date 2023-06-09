@@ -7,7 +7,7 @@ $$
 DECLARE res INT;
 BEGIN
 	-- TODO: проверка на наличие имени
-	INSERT INTO AUTHOR(name, degree) VALUES(newName, newDegree)
+	INSERT INTO AUTHOR_COMPOSITE(name, degree) VALUES(newName, newDegree)
 	RETURNING authorID INTO res;
 	RETURN res;
 END;
@@ -20,7 +20,7 @@ CREATE OR REPLACE FUNCTION edit_author(
 ) RETURNS void AS
 $$
 BEGIN
-	UPDATE AUTHOR 
+	UPDATE AUTHOR_COMPOSITE 
 		SET name = newName,
 		degree = newDegree 
 	WHERE authorID = editID;
@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION remove_author(
 ) RETURNS void AS
 $$
 BEGIN
-	DELETE FROM AUTHOR WHERE authorID = removeID;
+	DELETE FROM AUTHOR_COMPOSITE WHERE authorID = removeID;
 END;
 $$ LANGUAGE  plpgsql;
 
@@ -91,10 +91,11 @@ BEGIN
 	LOOP
 		INSERT INTO PUBLICATION_AUTHORS(publicationID, authorID) VALUES(editID, aID);
 	END LOOP;
-	
+	COMMIT;
 	IF (SELECT COUNT(*) FROM PUBLICATION_AUTHORS pa WHERE pa.publicationID=editID)=0
-	THEN ROLLBACK; END IF;
-	-- TODO: raise error;
+	THEN ROLLBACK;
+	RAISE EXCEPTION 'Attempt to set empty list at publicationID=%', editID;
+	END IF;
 END;
 $$ LANGUAGE  plpgsql;
 
@@ -204,10 +205,11 @@ BEGIN
 	LOOP
 		INSERT INTO COMPILATION_ENTRY(publicationID, compilationID) VALUES(pID, editID);
 	END LOOP;
-	
+	COMMIT;
 	IF (SELECT COUNT(*) FROM COMPILATION_ENTRY ce WHERE ce.compilationID=editID)=0
-	THEN ROLLBACK; END IF;
-	-- TODO: raise error;
+	THEN ROLLBACK;
+	RAISE EXCEPTION 'Attempt to set empty list at compilationID=%', editID;
+	END IF;
 END;
 $$ LANGUAGE  plpgsql;
 
@@ -239,6 +241,24 @@ RETURNS SETOF COMPILATION_COMPOSITE AS $$ BEGIN
 		WHERE ce.publicationID = _id;
 END; $$ LANGUAGE  plpgsql;
 
+CREATE OR REPLACE FUNCTION get_publishers_compilations(_id int)
+RETURNS setof compilation_composite AS $$ BEGIN
+	return 
+	QUERY WITH tmp AS (
+		SELECT
+			c.compilationID,
+			c.name,
+			c.publicationdate,
+			c.publisherID,
+			COALESCE(COUNT(ce.publicationID), 0) publicationCount
+		FROM COMPILATION c
+		JOIN COMPILATION_ENTRY ce ON ce.compilationID = c.compilationID
+		GROUP BY c.compilationID HAVING 															 >= 1 AND c.publisherID=_id;
+	)
+	SELECT tmp.compilationID, tmp.name, p.fullName, tmp.publicationdate, tmp.publicationCount FROM tmp
+	JOIN PUBLISHER p ON tmp.publisherID = p.publisherID;
+END; $$ LANGUAGE plpgsql;
+
 
 CREATE PROCEDURE set_authors_publications(
 	aID INT,
@@ -252,12 +272,12 @@ DECLARE
 BEGIN
 	-- Удалить публикации, в которых автор есть
 	OPEN cur FOR( 
-		WITH tmp AS (
-		SELECT
-			p.publicationID p_id,
-			array(SELECT authorID FROM PUBLICATION_AUTHORS pa WHERE pa.publicationID = p.publicationID) as a_ids
-		FROM PUBLICATION p		
-		) SELECT * FROM tmp
+		SELECT tmp.* FROM (
+			SELECT
+				p.publicationID p_id,
+				array(SELECT authorID FROM PUBLICATION_AUTHORS pa WHERE pa.publicationID = p.publicationID) as a_ids
+			FROM PUBLICATION p		
+		) as tmp
 		WHERE tmp.a_ids && ARRAY[aID] AND NOT new_pIDs && ARRAY[tmp.p_id]);
 	LOOP
 		FETCH cur INTO i;
@@ -285,7 +305,7 @@ BEGIN
 		IF NOT FOUND THEN EXIT; END IF;
 		INSERT INTO PUBLICATION_AUTHORS(authorID, publicationID) VALUES(aID, i.p_id);
 	END LOOP;
-END;
+END;	
 $$ LANGUAGE  plpgsql;
 
 CREATE OR REPLACE FUNCTION can_edit(username NAME)
