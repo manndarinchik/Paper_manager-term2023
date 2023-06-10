@@ -351,8 +351,8 @@ void AuthorViewWindow::submit(){
             QString("SELECT * FROM add_author('%1', '%2'); ").arg(
                 newName->text(), newDegree->text()
         ));
-        itemID = model->data(model->index(0,0)).toInt();
         error = model == nullptr;
+        if (!error) itemID = model->data(model->index(0,0)).toInt();
         delete model;
     } else 
         error = query_database(
@@ -463,8 +463,8 @@ void PublisherViewWindow::submit(){
             QString("SELECT * FROM add_publisher('%1', '%2', '%3', '%4', '%5', '%6'); ").arg(
                 newName->text(), newCountry->text(), newCity->text(), newAddress->text(), newNum->text(), newEmail->text()
         ));
-        itemID = model->data(model->index(0,0)).toInt();
         error = model == nullptr;
+        if (!error) itemID = model->data(model->index(0,0)).toInt();
         delete model;
     } else 
         error = query_database(
@@ -563,8 +563,8 @@ void CompilationViewWindow::submit(){
             QString("SELECT * FROM add_compilation('%1', %2, %3); ").arg(
                 newName->text(), QString::number(newPublisher), format_date(newDate->date())
         ));
-        itemID = model->data(model->index(0,0)).toInt();
         error = model == nullptr;
+        if (!error) itemID = model->data(model->index(0,0)).toInt();
         delete model;
     } else 
         error = query_database(

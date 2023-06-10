@@ -91,7 +91,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT generate_data(100);
+--SELECT generate_data(100);
 
 /*
 TRUNCATE TABLE PUBLICATION RESTART IDENTITY CASCADE;
